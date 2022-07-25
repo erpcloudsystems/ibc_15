@@ -23,8 +23,12 @@ def after_insert(doc, method=None):
     ## Get Values From Website Item and Item
     sku = doc.item_code
     item1 = frappe.get_doc("Item", doc.item_code)
-    doc.web_long_description = item1.woocommerce_description
-    doc.short_description = item1.woocommerce_description
+    if item1.website_ar:
+        doc.web_long_description = item1.discription_ar
+        doc.short_description = item1.discription_ar
+    if not item1.website_ar:
+        doc.web_long_description = item1.description
+        doc.short_description = item1.description
     doc.save()
     item_name = doc.web_item_name
     #permalink = "https://example.com/product" + doc.web_item_name
