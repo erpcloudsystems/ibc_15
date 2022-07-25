@@ -14,7 +14,6 @@
   "customer_representative",
   "mobile_no",
   "column_break_4",
-  "amended_from",
   "posting_date",
   "issue_type",
   "installation_engineer",
@@ -34,7 +33,8 @@
   "general_notes",
   "section_break_26",
   "create_invoice",
-  "sales_invoice"
+  "sales_invoice",
+  "amended_from"
  ],
  "fields": [
   {
@@ -76,15 +76,6 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Ticket",
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "default": "Today",
@@ -178,15 +169,6 @@
    "label": "General Notes"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Ticket",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "info_section",
    "fieldtype": "Section Break",
    "label": "Customer Info"
@@ -214,6 +196,15 @@
   {
    "fieldname": "section_break_26",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Ticket",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -224,7 +215,7 @@
    "link_fieldname": "ticket"
   }
  ],
- "modified": "2022-07-21 11:32:29.882916",
+ "modified": "2022-07-25 12:26:35.933442",
  "modified_by": "Administrator",
  "module": "Ibc",
  "name": "Ticket",
@@ -245,5 +236,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "customer_name"
+ "title_field": "customer_name",
+ "track_changes": 1,
+ "track_seen": 1
 }
