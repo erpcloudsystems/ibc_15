@@ -8,8 +8,22 @@ from frappe.model.document import Document
 
 class Ticket(Document):
     @frappe.whitelist()
+    def onload(self):
+        paid_amount = frappe.db.sql(""" select sum(`tabPayment Entry`.paid_amount) as paid_amount
+    
+                                                                  from `tabPayment Entry` 
+                                                                  where `tabPayment Entry`.reference_link = '{name}'
+                                                                  and `tabPayment Entry`.docstatus = 1
+                                                                  """.format(name=self.name), as_dict=1)
+        for x in paid_amount:
+            self.total_paid_amount = x.paid_amount
+            self.outstanding = self.total_cost - self.total_paid_amount
+
+
+    @frappe.whitelist()
     def validate(self):
         self.calculate_total()
+
 
     @frappe.whitelist()
     def on_submit(self):
@@ -21,6 +35,7 @@ class Ticket(Document):
         for x in self.items:
             totals += x.cost
         self.total_cost = totals
+
 
     @frappe.whitelist()
     def check_mandatory_fields(self):
@@ -46,6 +61,7 @@ class Ticket(Document):
             details = frappe.db.sql(""" select `tabDelivery Note`.name as delivery_note, 
                                                 `tabDelivery Note`.posting_date as dn_date,
                                                 `tabDelivery Note`.customer as customer,
+                                                `tabDelivery Note`.customer_name as customer_name,
                                                 `tabDelivery Note`.sales_person as sales_person,
                                                 `tabDelivery Note Item`.item_code as item_code, 
                                                 `tabDelivery Note Item`.name as dn_item_name, 
@@ -61,6 +77,7 @@ class Ticket(Document):
             for x in details:
                 y = self.append("items", {})
                 y.customer = x.customer
+                y.customer_name = x.customer_name
                 y.delivery_note = x.delivery_note
                 y.dn_item_name = x.dn_item_name
                 y.dn_date = x.dn_date
@@ -74,36 +91,29 @@ class Ticket(Document):
             #self.save()
 
     @frappe.whitelist()
-    def create_invoice(self):
-        items = [
-            {
-                "doctype": "Sales Invoice Item",
-                "item_code": "9053",
-                "qty": 1,
-                "rate": self.total_cost,
-                "uom": "Unit",
-                "description": self.general_notes,
-                "conversion_factor": 1,
-                "income_account": "ايرادات الصيانه - IBC",
-                "cost_center": "فرع الصيانه -Maintenance - IBC",
-            }
-        ]
-
-        new_doc = frappe.get_doc({
-            "doctype": "Sales Invoice",
-            "ticket": self.name,
-            "cost_center": "فرع الصيانه -Maintenance - IBC",
-            "sales_person": "Maintenance",
-            #"sales_person_1": "Maintenance",
-            #"c_sales_person_1": "Maintenance",
-            "customer": self.customer,
-            "due_date": self.posting_date,
+    def create_payment_entry(self):
+        if self.total_cost == 0:
+            frappe.throw(" Please Add The Cost In The Items Table")
+        pe_doc = frappe.get_doc({
+            "doctype": "Payment Entry",
             "posting_date": self.posting_date,
-            "currency": "EGP",
-            "items": items,
+            "payment_type": "Receive",
+            "mode_of_payment": "Maintenance",
+            "reference_doctype": "Ticket",
+            "reference_link": self.name,
+            "paid_to": "خزنه الصيانه - IBC",
+            "paid_from": "العملاء - IBC",
+            "party_type": "Customer",
+            "party": self.customer,
+            "paid_amount": self.outstanding,
+            "received_amount": self.total_cost,
+            "reference_date": self.posting_date,
+            "source_exchange_rate": 1,
+            "target_exchange_rate": 1,
         })
-        new_doc.insert(ignore_permissions=True)
-        self.sales_invoice = new_doc.name
+        pe_doc.insert(ignore_permissions=True)
+        self.payment_entry = pe_doc.name
+        self.payment_entry_status = pe_doc.status
         self.save()
         self.reload()
-        frappe.msgprint(" Sales Invoice " + "<a href=/app/sales-invoice/" + new_doc.name + ">" + new_doc.name + "</a>" + " Created Successfully ")
+        frappe.msgprint("  تم إنشاء تحصيل رقم " + pe_doc.name)

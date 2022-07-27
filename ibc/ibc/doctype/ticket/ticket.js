@@ -14,16 +14,17 @@ frappe.ui.form.on('Ticket', {
 });
 
 frappe.ui.form.on('Ticket', {
-    create_invoice: function(frm) {
+    create_payment1: function(frm) {
         frappe.call({
             doc: frm.doc,
-            method: "create_invoice",
+            method: "create_payment_entry",
                 callback: function(r) {
-                    frm.reload_doc()
+                refresh_field("payment_entry");
             }
         });
 	}
 });
+
 
 frappe.ui.form.on("Ticket Items", "create_stock_entry", function(frm,cdt,cdn) {
     var d = locals[cdt][cdn];

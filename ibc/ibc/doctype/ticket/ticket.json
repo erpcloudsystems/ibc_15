@@ -29,6 +29,7 @@
   "html_17",
   "column_break_17",
   "total_cost",
+  "total_paid_amount",
   "section_break_27",
   "general_notes",
   "section_break_26",
@@ -174,11 +175,6 @@
    "label": "Customer Info"
   },
   {
-   "fieldname": "installation_engineer",
-   "fieldtype": "Data",
-   "label": "Installation Engineer"
-  },
-  {
    "bold": 1,
    "depends_on": "eval:!doc.sales_invoice && doc.docstatus == 1",
    "fieldname": "create_invoice",
@@ -205,17 +201,30 @@
    "options": "Ticket",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "total_paid_amount",
+   "fieldtype": "Currency",
+   "label": "Total Paid Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "installation_engineer",
+   "fieldtype": "Link",
+   "label": "Installation Engineer",
+   "options": "User"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [
   {
-   "link_doctype": "Sales Invoice",
-   "link_fieldname": "ticket"
+   "link_doctype": "Payment Entry",
+   "link_fieldname": "reference_link",
+   "parent_doctype": "Payment Entry"
   }
  ],
- "modified": "2022-07-25 12:26:35.933442",
+ "modified": "2022-07-26 17:04:20.733820",
  "modified_by": "Administrator",
  "module": "Ibc",
  "name": "Ticket",
