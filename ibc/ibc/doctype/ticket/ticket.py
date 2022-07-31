@@ -17,6 +17,8 @@ class Ticket(Document):
                                                                   """.format(name=self.name), as_dict=1)
         for x in paid_amount:
             self.total_paid_amount = x.paid_amount
+            if not self.total_paid_amount:
+                self.total_paid_amount = 0
             self.outstanding = self.total_cost - self.total_paid_amount
 
 
