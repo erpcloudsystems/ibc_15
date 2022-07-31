@@ -27,7 +27,8 @@ def on_submit(doc, method=None):
             "credit": doc.paid_amount,
             "debit": 0,
             "credit_in_account_currency": doc.paid_amount,
-            "user_remark": doc.name
+            "user_remark": doc.name,
+            "cost_center": "فرع الصيانه -Maintenance - IBC"
         },
         {
             "doctype": "Journal Entry Account",
