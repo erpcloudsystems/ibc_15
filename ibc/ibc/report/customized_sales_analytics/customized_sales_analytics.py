@@ -140,7 +140,7 @@ class Analytics(object):
 
 	def get_sales_transactions_based_on_items(self):
 		conditions = ""
-		if self.filters["sales_person"] != '':
+		if self.filters("sales_person") != '':
 			conditions += " and s.sales_person = %(sales_persone)s "
 		if self.filters["value_quantity"] == 'Value':
 			value_field = 'base_amount'
@@ -154,7 +154,7 @@ class Analytics(object):
 			and s.{date_field} between %s and %s 
 			{conditions}
 		"""
-		.format(conditions=conditions, date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
+		.format( date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
 		(self.filters.company, self.filters.from_date, self.filters.to_date, self.filters.sales_person), as_dict=1)
 
 		self.entity_names = {}
@@ -181,7 +181,9 @@ class Analytics(object):
 			self.entity_names.setdefault(d.entity, d.entity_name)
 
 	def get_sales_transactions_based_on_sales_person(self):
-
+		conditions = ""
+		if self.filters("sales_person"):
+			conditions += " and s.sales_person = %(sales_persone)s "
 		if self.filters["value_quantity"] == 'Value':
 			value_field = 'base_amount'
 		else:
@@ -191,10 +193,11 @@ class Analytics(object):
 			select s.sales_person as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
 			from `tab{doctype} Item` i , `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s and s.sales_person = %s
+			and s.{date_field} between %s and %s
+				{conditions}
 		"""
-		.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, sales_person=self.filters.sales_person,),
-		(self.filters.company, self.filters.from_date, self.filters.to_date, self.filters.sales_person), as_dict=1)
+		.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, conditions=conditions  ),
+			(self.filters.sales_person,self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
 
 		
 
