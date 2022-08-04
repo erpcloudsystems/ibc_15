@@ -46,14 +46,6 @@ frappe.query_reports["New Sales Analytics"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1
-		},
-		{
 			fieldname: "sales_person",
 			label: __("Sales Person"),
 			fieldtype: "Link",
