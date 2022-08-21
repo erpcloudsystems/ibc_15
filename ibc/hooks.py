@@ -672,9 +672,6 @@ doctype_js = {
 
 
 
-
-
-
 scheduler_events = {
 	 "all": [
  		"ibc.scheduler_events.all.all"
