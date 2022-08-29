@@ -98,7 +98,6 @@ class Ticket(Document):
             frappe.throw(" Please Add The Cost In The Items Table")
         pe_doc = frappe.get_doc({
             "doctype": "Payment Entry",
-            "posting_date": self.posting_date,
             "payment_type": "Receive",
             "mode_of_payment": "Maintenance",
             "reference_doctype": "Ticket",
