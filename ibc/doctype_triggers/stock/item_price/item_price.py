@@ -56,9 +56,12 @@ def validate(doc, method=None):
                     data["regular_price"] = str(price)
                     data["description"] = item.web_long_description
                     data["short_description"] = item.web_long_description
+                    data["image"] = image
+                    '''
                     images = []
                     images.append({"src": image})
                     data["images"] = images
+                    '''
                     categories = []
                     categories.append({"id": category_id})
                     data["categories"] = categories

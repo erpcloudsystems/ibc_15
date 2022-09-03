@@ -94,9 +94,12 @@ def update_woocommerce():
         data["regular_price"] = str(price)
         data["description"] = x.web_long_description
         data["short_description"] = x.web_long_description
+        data["image"] = image
+        '''
         images = []
         images.append({"src": image})
         data["images"] = images
+        '''
         categories = []
         categories.append({"id": category_id})
         data["categories"] = categories
