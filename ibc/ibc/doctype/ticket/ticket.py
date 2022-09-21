@@ -100,6 +100,7 @@ class Ticket(Document):
             "doctype": "Payment Entry",
             "payment_type": "Receive",
             "mode_of_payment": "Maintenance",
+            "maintenanc_customer_name": self.maintenanc_customer_name,
             "reference_doctype": "Ticket",
             "reference_link": self.name,
             "paid_to": "خزنه الصيانه - IBC",
