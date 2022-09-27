@@ -66,8 +66,7 @@ def get_total_stock(filters):
 				ON ledger.item_code = price.item_code
 
 			WHERE
-				ledger.actual_qty != 0
-				and warehouse.summery_stock = 1
+				warehouse.summery_stock = 1
 				and price.price_list = '{price_list}' %s""".format(price_list=default_price_list)
 		% (columns, conditions)
 	)
