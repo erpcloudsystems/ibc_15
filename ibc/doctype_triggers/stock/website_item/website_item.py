@@ -47,11 +47,11 @@ def after_insert(doc, method=None):
     data["description"] = doc.web_long_description
     data["short_description"] = doc.web_long_description
     data["image"] = image
-
+    '''
     images = []
     images.append({"src": image})
     data["images"] = images
-
+    '''
     categories = []
     categories.append({"id": category_id})
     data["categories"] = categories
@@ -110,11 +110,11 @@ def validate(doc, method=None):
         data["description"] = doc.web_long_description
         data["short_description"] = doc.web_long_description
         data["image"] = image
-
+        '''
         images = []
         images.append({"src": image})
         data["images"] = images
-        
+        '''
         categories = []
         categories.append({"id": category_id})
         data["categories"] = categories
