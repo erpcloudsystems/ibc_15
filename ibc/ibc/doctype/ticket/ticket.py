@@ -12,7 +12,7 @@ class Ticket(Document):
         paid_amount = frappe.db.sql(""" select sum(`tabPayment Entry`.paid_amount) as paid_amount
     
                                                                   from `tabPayment Entry` 
-                                                                  where `tabPayment Entry`.reference_link = '{name}'
+                                                                  where `tabPayment Entry`.reference_link2 = '{name}'
                                                                   and `tabPayment Entry`.docstatus = 1
                                                                   """.format(name=self.name), as_dict=1)
         for x in paid_amount:
