@@ -67,7 +67,8 @@ def on_update_after_submit(doc, method=None):
     pass
 @frappe.whitelist()
 def before_save(doc, method=None):
-    pass
+    if doc.reference_doctype == "Ticket":
+        doc.reference_link ==""
 @frappe.whitelist()
 def before_cancel(doc, method=None):
     pass
