@@ -163,7 +163,7 @@ def validate(doc, method=None):
             woocommerce_user_key, woocommerce_user_secret, None, None, signature_method="HMAC-SHA1"
         )
         headers = {"content-type": "application/json;charset=utf-8", "Content-Length": "376"}
-        response = requests.post(
+        response = requests.put(
             url=woocommerce_create + str(woocommerce_id),
             data=json.dumps(data),
             auth=headeroauth,
