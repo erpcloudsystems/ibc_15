@@ -1,7 +1,7 @@
 {
  "add_total_row": 1,
  "columns": [],
- "creation": "2021-11-03 17:16:30.958177",
+ "creation": "2022-10-24 14:25:57.070731",
  "disable_prepared_report": 0,
  "disabled": 0,
  "docstatus": 0,
@@ -10,19 +10,16 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "IBC",
- "modified": "2021-11-03 17:16:30.958177",
+ "modified": "2022-10-24 14:25:57.070731",
  "modified_by": "Administrator",
  "module": "Ibc",
- "name": "Stock Brands Value",
+ "name": "stock_brands_value",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Stock Entry",
- "report_name": "Stock Brands Value",
+ "ref_doctype": "Item",
+ "report_name": "stock_brands_value",
  "report_type": "Script Report",
  "roles": [
-  {
-   "role": "Stock Manager"
-  },
   {
    "role": "Manufacturing User"
   },
@@ -30,40 +27,79 @@
    "role": "Stock User"
   },
   {
-   "role": "Manufacturing Manager"
+   "role": "Item Manager"
   },
   {
-   "role": "Store keeper"
+   "role": "Accounts User"
   },
   {
-   "role": "Technical Support Engineer"
+   "role": "Purchase User"
   },
   {
-   "role": "Pre Sales Engineer"
-  },
-  {
-   "role": "Pre Sales Engineer Manager"
-  },
-  {
-   "role": "Lead Manager"
+   "role": "Stock Manager"
   },
   {
    "role": "Sales User"
   },
   {
-   "role": "Installation Manager"
+   "role": "POS"
   },
   {
-   "role": "Inqury Report"
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales Accountant"
+  },
+  {
+   "role": "Sales Supervisor"
+  },
+  {
+   "role": "Project Engineer"
   },
   {
    "role": "Project Engineer Team leader"
   },
   {
+   "role": "Technical Pre-sales"
+  },
+  {
+   "role": "Installation Manager"
+  },
+  {
+   "role": "Installation Engineer"
+  },
+  {
+   "role": "Regional Sales Manager"
+  },
+  {
+   "role": "Lead Manager"
+  },
+  {
+   "role": "Technical Support Engineer"
+  },
+  {
+   "role": "Store keeper"
+  },
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "Pre Sales Engineer"
+  },
+  {
    "role": "Sales Order Only"
   },
   {
-   "role": "Sales Manager"
+   "role": "Technical Support Admin"
+  },
+  {
+   "role": "Pre Sales Engineer Manager"
+  },
+  {
+   "role": "Item Creation"
+  },
+  {
+   "role": "Technical Support Manager"
   }
  ]
 }

@@ -39,7 +39,7 @@ def daily():
     frappe.db.sql(
         """update `tabSales Order Item` join `tabItem` on `tabSales Order Item`.item_code = `tabItem`.name set `tabSales Order Item`.item_group = `tabItem`.item_group""")
     frappe.db.sql(
-        """update `tabStock Ledger Entry` inner join tabItem on tabItem.item_code = `tabStock Ledger Entry`.item_code set `tabStock Ledger Entry`.brand = tabItem.brand where `tabStock Ledger Entry`.warehouse != '- IBC'""")
+        """update `tabStock Ledger Entry` inner join tabItem on tabItem.item_code = `tabStock Ledger Entry`.item_code set `tabStock Ledger Entry`.brand = tabItem.brand where `tabStock Ledger Entry`.brand IS NULL""")
     frappe.db.sql(
         """update `tabStock Ledger Entry` join tabItem on `tabStock Ledger Entry`.item_code = tabItem.name set `tabStock Ledger Entry`.item_group = tabItem.item_group""")
 
