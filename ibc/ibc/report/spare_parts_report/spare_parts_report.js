@@ -1,8 +1,8 @@
-// Copyright (c) 2016, erpcloud.systems and contributors
+// Copyright (c) 2022, erpcloud.systems and contributors
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Installation Note Report"] = {
+frappe.query_reports["Spare Parts Report"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",
@@ -27,6 +27,4 @@ frappe.query_reports["Installation Note Report"] = {
 		}
 	]
 }
-
-
 
