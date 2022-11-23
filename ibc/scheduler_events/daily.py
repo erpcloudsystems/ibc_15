@@ -4,6 +4,8 @@ from frappe import _
 
 frappe.whitelist()
 def daily():
+    pass
+    '''
     frappe.db.sql(
         """update tabBin inner join tabItem on tabItem.item_code = tabBin.item_code set tabBin.brand = tabItem.brand where tabItem.valuation_rate != 1000000112 """)
     frappe.db.sql(
@@ -42,9 +44,9 @@ def daily():
         """update `tabStock Ledger Entry` inner join tabItem on tabItem.item_code = `tabStock Ledger Entry`.item_code set `tabStock Ledger Entry`.brand = tabItem.brand where `tabStock Ledger Entry`.brand IS NULL""")
     frappe.db.sql(
         """update `tabStock Ledger Entry` join tabItem on `tabStock Ledger Entry`.item_code = tabItem.name set `tabStock Ledger Entry`.item_group = tabItem.item_group""")
-
+    
     update_woocommerce()
-
+    '''
 frappe.whitelist()
 def update_woocommerce():
     ## Get Single Values from Ecs Woocommerce seetings page

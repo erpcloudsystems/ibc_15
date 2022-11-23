@@ -6,6 +6,8 @@ from requests_oauthlib import OAuth1
 
 frappe.whitelist()
 def hourly():
+    pass
+    '''
     frappe.db.sql(
         """update tabItem set tabItem.summary_stock = (select sum(tabBin.actual_qty) from tabBin join tabWarehouse on tabBin.warehouse = tabWarehouse.name where tabWarehouse.summery_stock = 1 and tabBin.item_code = tabItem.name)""")
     frappe.db.sql(
@@ -50,3 +52,4 @@ def hourly():
         """update `tabStock Ledger Entry` inner join tabItem on tabItem.item_code = `tabStock Ledger Entry`.item_code set `tabStock Ledger Entry`.brand = tabItem.brand where `tabStock Ledger Entry`.brand IS NULL""")
     frappe.db.sql(
         """update `tabStock Ledger Entry` join tabItem on `tabStock Ledger Entry`.item_code = tabItem.name set `tabStock Ledger Entry`.item_group = tabItem.item_group""")
+    '''
