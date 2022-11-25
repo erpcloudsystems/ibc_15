@@ -64,14 +64,14 @@ def after_insert(doc, method=None):
 
     categories = []
     categories.append({"id": category_id})
-    # if frappe.db.exists("Website Item Group", {"parent": doc.name}, "item_group"):
-    #     items_groups = frappe.db.get_list("Website Item Group", {"parent": doc.name}, "item_group")
-    #     for item_group in items_groups:
-    #         category_ids = frappe.db.get_value(
-    #             "Item Group", item_group["item_group"], "category_id"
-    #         )
+    if frappe.db.exists("Website Item Group", {"parent": doc.name}, "item_group"):
+        items_groups = frappe.db.get_list("Website Item Group", {"parent": doc.name}, "item_group")
+        for item_group in items_groups:
+            category_ids = frappe.db.get_value(
+                "Item Group", item_group["item_group"], "category_id"
+            )
 
-    #     categories.append({"id": category_ids})
+        categories.append({"id": category_ids})
     data["categories"] = categories
     # frappe.msgprint(json.dumps(data))
     headeroauth = OAuth1(
@@ -159,16 +159,16 @@ def validate(doc, method=None):
 
         categories = []
         categories.append({"id": category_id})
-        # if frappe.db.exists("Website Item Group", {"parent": doc.name}, "item_group"):
-        #     items_groups = frappe.db.get_list(
-        #         "Website Item Group", {"parent": doc.name}, "item_group"
-        #     )
-        #     for item_group in items_groups:
-        #         category_ids = frappe.db.get_value(
-        #             "Item Group", item_group["item_group"], "category_id"
-        #         )
+        if frappe.db.exists("Website Item Group", {"parent": doc.name}, "item_group"):
+            items_groups = frappe.db.get_list(
+                "Website Item Group", {"parent": doc.name}, "item_group"
+             )
+            for item_group in items_groups:
+                category_ids = frappe.db.get_value(
+                     "Item Group", item_group["item_group"], "category_id"
+                )
 
-        #         categories.append({"id": category_ids})
+                categories.append({"id": category_ids})
         data["categories"] = categories
 
         woocommerce_id = doc.woocommerce_id
