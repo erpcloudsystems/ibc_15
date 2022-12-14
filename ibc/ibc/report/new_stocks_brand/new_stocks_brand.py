@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+ # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 from __future__ import unicode_literals
 import frappe
@@ -82,11 +82,12 @@ def get_item_price_qty_data(filters):
                     ifnull(`tabItem`.name,0) as item_code,
                     ifnull(`tabItem`.item_name,0) as item_name,
                     ifnull(`tabItem`.brand,0) as brand,
-                    ifnull(`tabItem`.valuation_rate,0) as valuation_rate
+                    ifnull(`tabBin`.valuation_rate,0) as valuation_rate
                 from
-                    `tabItem`
+                    `tabItem` join `tabBin` on `tabItem`.name = `tabBin`.item_code
                 where
                 `tabItem`.disabled in (0, 1)
+                and `tabBin`.warehouse = "المخزن الرئيسي - IBC" 
                     {conditions}
                 """.format(conditions=conditions), filters, as_dict=1)
 
