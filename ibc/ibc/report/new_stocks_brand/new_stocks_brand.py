@@ -87,7 +87,7 @@ def get_item_price_qty_data(filters):
                     `tabItem` join `tabBin` on `tabItem`.name = `tabBin`.item_code
                 where
                 `tabItem`.disabled in (0, 1)
-                and `tabBin`.warehouse = "المخزن الرئيسي - IBC" 
+                and `tabBin`.warehouse = "المخزن الرئيسي - IBC"
                     {conditions}
                 """.format(conditions=conditions), filters, as_dict=1)
 
@@ -112,6 +112,7 @@ def get_item_price_qty_data(filters):
             s = 0
             s1 = 0
             s2 = 0
+
             for warehouse in warehouses:
                 warehousee = warehouse.name
                 total_qty = frappe.db.sql("""select
@@ -120,9 +121,9 @@ def get_item_price_qty_data(filters):
                                                     where
                                                     `tabStock Ledger Entry`.item_code = %s
                                                     and `tabStock Ledger Entry`.warehouse = %s
-                                                    and `tabStock Ledger Entry`.posting_date <= %s
+                                                    and `tabStock Ledger Entry`.posting_date >= %s
                                                     and `tabStock Ledger Entry`.is_cancelled = 0
-                                                    ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC LIMIT 1""",
+                                                    """,
                                           (item, warehousee, from_date), as_dict=1)
                 for tqty in total_qty:
                     s += tqty.res
@@ -136,9 +137,9 @@ def get_item_price_qty_data(filters):
                                                                 `tabStock Ledger Entry`.item_code = %s
                                                                 and `tabStock Ledger Entry`.warehouse = %s
                                                                 and `tabWarehouse`.summery_stock = 1
-                                                                and `tabStock Ledger Entry`.posting_date <= %s
+                                                                and `tabStock Ledger Entry`.posting_date >= %s
                                                                 and `tabStock Ledger Entry`.is_cancelled = 0
-                                                                ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC LIMIT 1""",
+                                                                """,
                                             (item, warehousee, from_date), as_dict=1)
                 for tqty1 in summary_qty:
                     s1 += tqty1.res
@@ -152,9 +153,9 @@ def get_item_price_qty_data(filters):
                                                                 `tabStock Ledger Entry`.item_code = %s
                                                                 and `tabStock Ledger Entry`.warehouse = %s
                                                                 and `tabWarehouse`.summery_stock = 0
-                                                                and `tabStock Ledger Entry`.posting_date <= %s
+                                                                and `tabStock Ledger Entry`.posting_date >= %s
                                                                 and `tabStock Ledger Entry`.is_cancelled = 0
-                                                                ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC LIMIT 1""",
+                                                                """,
                                             (item, warehousee, from_date), as_dict=1)
                 for tqty2 in not_summary_qty:
                     s2 += tqty2.res
