@@ -1,126 +1,189 @@
+
+
+# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
 from __future__ import unicode_literals
 import frappe
 from frappe import _
 
-
 def execute(filters=None):
-    columns = get_columns()
-    data = get_data(filters)
-    return columns, data
-
+	columns, data = [], []
+	columns=get_columns()
+	data=get_data(filters,columns)
+	return columns, data
 
 def get_columns():
-    return [
-        {
-            'fieldname': 'posting_date',
-            'fieldtype': 'Link',
-            'label': _('Date'),
-            'options': 'Sales Invoice'
-        },
-        {
-            'fieldname': 'name',
-            'fieldtype': 'Link',
-            'label': _('Sales Invoice'),
-            'options': 'Sales Invoice'
-        },
-        {
-            'fieldname': 'customer_name',
-            'fieldtype': 'Link',
-            'label': _('Customer'),
-            'options': 'Sales Invoice'
-        },
-        {
-            'fieldname': 'grand_total',
-            'fieldtype': 'Float',
-            'label': _('Grand Total'),
-        },
-        {
-            'fieldname': 'total_discount',
-            'fieldtype': 'Float',
-            'label': _('Item Discount'),
-        },
-        {
-            'fieldname': 'discount_amount',
-            'fieldtype': 'Float',
-            'label': _('Additional Discount'),
-        },
-        {
-            'fieldname': 'net_total',
-            'fieldtype': 'Float',
-            'label': _('Net Total'),
-        },
-        {
-            'fieldname': 'payment',
-            'fieldtype': 'Link',
-            'label': _('Mode Of Payment'),
-            'options': 'Sales Invoice'
-        },
-        {
-            'fieldname': 'source',
-            'fieldtype': 'Link',
-            'label': _('Source'),
-            'options': 'Sales Invoice'
-        },
-        {
-            'fieldname': 'mobile_no',
-            'fieldtype': 'Link',
-            'label': _('Mobile Number'),
-            'options': 'Customer'
-        },
-        {
-            'fieldname': 't_sales_person',
-            'fieldtype': 'Link',
-            'label': _('T Sales Person'),
-            'options': 'Sales Invoice'
-        },
-        {
-            'fieldname': 'o_sales_person',
-            'fieldtype': 'Link',
-            'label': _('O Sales Person'),
-            'options': 'Customer'
-        },
-    ]
+	return [
+		{
+			"label": _("Sales Invoice"),
+			"fieldname": "sales_invoice",
+			"fieldtype": "Link",
+			"options": "Sales Invoice",
+			"width": 180
+		},
+		{
+			"label": _("Status"),
+			"fieldname": "status",
+			"fieldtype": "Data",
+			"width": 100
+		},
+		{
+			"label": _("Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 95
+		},
+		{
+			"label": _("Sales Person"),
+			"fieldname": "sales_person",
+			"fieldtype": "Link",
+			"options": "Sales Person",
+			"width": 145
+		},
+		{
+			"label": _("Customer"),
+			"fieldname": "customer",
+			"fieldtype": "Data",
+			"width": 195
+		},
+		{
+			"label": _("Item Code"),
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 90
+		},
+		{
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"width": 155
+		},
+		{
+			"label": _("Item Group"),
+			"fieldname": "item_group",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"label": _("Brand"),
+			"fieldname": "brand",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"label": _("Qty"),
+			"fieldname": "qty",
+			"fieldtype": "Float",
+			"width": 60
+		},
+		{
+			"label": _("Disc (%)"),
+			"fieldname": "discount_percentage",
+			"fieldtype": "Percent",
+			"width": 80
+		},
+		{
+			"label": _("Price List"),
+			"fieldname": "price_list_rate",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": _("Price"),
+			"fieldname": "rate",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": _("Net Amount"),
+			"fieldname": "net_amount",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": _("Return"),
+			"fieldname": "is_return",
+			"fieldtype": "Check",
+			"width": 70
+		}
+	]
+
+def get_data(filters, columns):
+	item_price_qty_data = []
+	item_price_qty_data = get_item_price_qty_data(filters)
+	return item_price_qty_data
+
+def get_item_price_qty_data(filters):
+	conditions = ""
+	if filters.get("from_date"):
+		conditions += " and `tabSales Invoice`.posting_date>=%(from_date)s"
+	if filters.get("to_date"):
+		conditions += " and `tabSales Invoice`.posting_date<=%(to_date)s"
+	if filters.get("brand"):
+		conditions += " and `tabSales Invoice Item`.brand=%(brand)s"
+
+	item_results = frappe.db.sql(""" select
+										`tabSales Invoice`.name as sales_invoice,
+										`tabSales Invoice`.posting_date as posting_date,
+										`tabSales Invoice`.sales_person as sales_person,
+										`tabSales Invoice`.customer as customer,
+										`tabSales Invoice Item`.item_code as item_code,
+										`tabSales Invoice Item`.item_name as item_name,
+										`tabSales Invoice Item`.qty as qty,
+										`tabSales Invoice Item`.discount_percentage as discount_percentage,
+										`tabSales Invoice Item`.price_list_rate as price_list_rate,
+										`tabSales Invoice Item`.rate as rate,
+										`tabSales Invoice Item`.item_group as item_group,
+										`tabSales Invoice Item`.brand as brand,
+										`tabSales Invoice`.status as status,
+										`tabSales Invoice Item`.net_amount as net_amount,
+										`tabSales Invoice Item`.amount as amount,
+										`tabSales Invoice`.is_return as is_return
+									from
+										`tabSales Invoice` join `tabSales Invoice Item` on `tabSales Invoice`.name = `tabSales Invoice Item`.parent
+									where
+										`tabSales Invoice`.docstatus = 1
+                                    and `tabSales Person`.parent_sales_person in ('6th October','Alexandria','Down Town','Head Office','Hurgada','New Cairo')
+										{conditions}
+									order by
+										`tabSales Invoice`.posting_date desc
+								"""
+		.format(conditions=conditions), filters, as_dict=1)
+
+
+	result = []
+	if item_results:
+		for item_dict in item_results:
+			data = {
+				'sales_invoice': item_dict.sales_invoice,
+				'posting_date': item_dict.posting_date,
+				'sales_person': item_dict.sales_person,
+				'customer': item_dict.customer,
+				'item_code': item_dict.item_code,
+				'item_name': item_dict.item_name,
+				'qty': item_dict.qty,
+				'discount_percentage': item_dict.discount_percentage,
+				'price_list_rate': item_dict.price_list_rate,
+				'rate': item_dict.rate,
+				'item_group': item_dict.item_group,
+				'brand': item_dict.brand,
+				'status': item_dict.status,
+				'net_amount': item_dict.net_amount,
+				'is_return': item_dict.is_return,
+				'amount': item_dict.amount
+			}
+			result.append(data)
+
+	return result
 
 
 
 
-def get_data(filters):
-    conditions = ""
-    salesp=filters.get("sales_person")
-    if filters.get("sales_person"):
-        conditions += f" and `tabSales Invoice`.sales_person = '{salesp}'"
-
-    if filters.get("to_date"):
-        conditions += " AND `tabSales Invoice`.posting_date <='%s'" % filters.get("to_date")
-    if filters.get("from_date"):
-        conditions += " AND `tabSales Invoice`.posting_date >='%s'" % filters.get("from_date")
-
-    data = frappe.db.sql(f"""
-    select
-    `tabSales Invoice`.posting_date as posting_date,
-    `tabSales Invoice`.name as name,
-    `tabSales Invoice`.customer_name as customer_name,
-    ((select sum(`tabSales Invoice Item`.amount) from `tabSales Invoice Item` where `tabSales Invoice Item`.parent = `tabSales Invoice`.name and `tabSales Invoice Item`.item_group not in ('2-Service','ID Printed','Maintenance contracts','Services1')) + (select sum(`tabSales Invoice Item`.item_discount) from `tabSales Invoice Item` where `tabSales Invoice Item`.parent = `tabSales Invoice`.name and `tabSales Invoice Item`.item_group not in ('2-Service','ID Printed','Maintenance contracts','Services1'))) as grand_total,
-    (select sum(`tabSales Invoice Item`.item_discount) from `tabSales Invoice Item` where `tabSales Invoice Item`.parent = `tabSales Invoice`.name and `tabSales Invoice Item`.item_group not in ('2-Service','ID Printed','Maintenance contracts','Services1')) as total_discount,
-    `tabSales Invoice`.discount_amount as discount_amount,
-    ((select sum(`tabSales Invoice Item`.amount) from `tabSales Invoice Item` where `tabSales Invoice Item`.parent = `tabSales Invoice`.name and `tabSales Invoice Item`.item_group not in ('2-Service','ID Printed','Maintenance contracts','Services1')) - `tabSales Invoice`.discount_amount) as net_total,
-    `tabSales Invoice`.payment as payment,
-    `tabSales Invoice`.source as source,
-    `tabCustomer`.mobile_no as mobile_no,
-    `tabSales Invoice`.sales_person as t_sales_person,
-    `tabCustomer`.sales_person as o_sales_person
-
-    from `tabSales Invoice`
-     join `tabCustomer`
-         on `tabSales Invoice`.customer = `tabCustomer`.name
-     join `tabSales Person`
-         on `tabSales Invoice`.sales_person = `tabSales Person`.name
-    where
-    `tabSales Invoice`.docstatus =1
-    and `tabSales Person`.parent_sales_person in ('6th October','Alexandria','Down Town','Head Office','Hurgada','New Cairo')
-    {conditions}
-    """,as_dict=True)
-
-
-    return data
 

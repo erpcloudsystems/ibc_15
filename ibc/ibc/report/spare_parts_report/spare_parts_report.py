@@ -77,6 +77,19 @@ def get_columns():
             "width": 200
         },
 
+        {
+            "label": _("Maintenanc Customer Name"),
+            "fieldname": "maintenanc_customer_name",
+            "fieldtype": "Data",
+            "width": 200
+        },
+        {
+            "label": _("Spare Parts"),
+            "fieldname": "spare_parts",
+            "fieldtype": "Data",
+            "width": 200
+        },
+
 
         {
             "label": _("Installation Engineer"),
@@ -113,6 +126,8 @@ def get_item_price_qty_data(filters):
                         `tabTicket Items`.new_internal as new_internal,
                         `tabTicket Items`.new_clear as new_clear,
                         `tabTicket`.customer_name as customer_name,
+                        `tabTicket`.maintenanc_customer_name as maintenanc_customer_name,
+                        `tabTicket Items`.spare_parts as spare_parts,
                         `tabTicket`.installation_engineer as installation_engineer
                 from
                         `tabTicket` join `tabTicket Items` on `tabTicket`.name = `tabTicket Items`.parent
@@ -141,6 +156,8 @@ def get_item_price_qty_data(filters):
                 'new_internal': item_dict.new_internal,
                 'new_clear': _(item_dict.new_clear),
                 'customer_name': _(item_dict.customer_name),
+                'maintenanc_customer_name': item_dict.maintenanc_customer_name,
+                'spare_parts':item_dict.spare_parts,
                 'full_name': full_name,
 
             }

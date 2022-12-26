@@ -20,7 +20,7 @@ frappe.query_reports["Spare Parts Report"] = {
 		},
 		{
 			"fieldname":"installation_engineer",
-			"label": __("installation_engineer"),
+			"label": __("Installation Engineer"),
 			"fieldtype": "Link",
 			"options" : "User",
 			"reqd": 0

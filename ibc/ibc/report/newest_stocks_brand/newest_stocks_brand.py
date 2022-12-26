@@ -44,31 +44,31 @@ def get_columns():
         {
             "label": _("Total Value"),
             "fieldname": "total_value",
-            "fieldtype": "Currency",
+            "fieldtype": "Data",
             "width": 150
         },
         {
             "label": _("Valuation Rate"),
             "fieldname": "valuation_rate",
-            "fieldtype": "Currency",
+            "fieldtype": "Data",
             "width": 150
         },
         {
             "label": _("Total Qty"),
             "fieldname": "total_qty",
-            "fieldtype": "Float",
+            "fieldtype": "Data",
             "width": 150
         },
         {
             "label": _("Summary QTY"),
             "fieldname": "summary_qty",
-            "fieldtype": "Float",
+            "fieldtype": "Data",
             "width": 150
         },
         {
             "label": _("Not Summary QTY"),
             "fieldname": "not_summary_qty",
-            "fieldtype": "Float",
+            "fieldtype": "Data",
             "width": 150
         }
     ]
