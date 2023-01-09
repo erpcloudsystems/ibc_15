@@ -18,15 +18,26 @@ frappe.query_reports["Newest Stocks Brand"] = {
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"reqd": 1,
 			"default": frappe.datetime.get_today(),
+		},
+		{
+
+			"fieldname": "item",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"options": "Item",
 		},
 		{
 			"fieldname": "brand",
 			"label": __("Brand"),
 			"fieldtype": "Link",
-			"reqd": 0,
 			"options": "Brand",
+		},
+		{
+			"fieldname": "warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse",
 		},
 
 	]

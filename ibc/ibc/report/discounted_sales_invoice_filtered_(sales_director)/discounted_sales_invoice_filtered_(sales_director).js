@@ -21,6 +21,20 @@ frappe.query_reports["Discounted Sales invoice Filtered (Sales Director)"] = {
 		"label": __("Brand"),
 		"fieldtype": "Link",
 		"options": "Brand"
-	}
+	},
+	{
+		"fieldname":"sales_person",
+		"label": __("Sales Person"),
+		"fieldtype": "Link",
+		"options": "Sales Person",
+		'width': 150,
+		"get_query": function() {
+			return {
+				"filters": {
+					"parent_sales_person": ["in", ['6th October','Alexandria','Down Town','Head Office','Hurgada','New Cairo']],
+				}
+			}
+		}
+	},
 ]
 };

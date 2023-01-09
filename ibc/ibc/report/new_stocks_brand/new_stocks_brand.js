@@ -21,11 +21,11 @@ frappe.query_reports["New Stocks Brand"] = {
 			"reqd": 1,
 			"default": frappe.datetime.get_today(),
 		},
+
 		{
 			"fieldname": "brand",
 			"label": __("Brand"),
 			"fieldtype": "Link",
-			"reqd": 0,
 			"options": "Brand",
 		},
 

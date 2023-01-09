@@ -1,0 +1,91 @@
+{
+ "add_total_row": 1,
+ "columns": [],
+ "creation": "2023-01-03 15:06:48.462183",
+ "disable_prepared_report": 1,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "label": "Brand",
+   "mandatory": 1,
+   "options": "Brand",
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "IBC",
+ "modified": "2023-01-03 15:12:30.641952",
+ "modified_by": "Administrator",
+ "module": "Ibc",
+ "name": "ssssssssssss",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "select\r\n    tabItem.item_code as \"Item:Link/Item:100\",\r\n    tabItem.item_name as \"Item Name::200\",\r\n    tabItem.brand as \"Brand::100\",\r\n    (tabBin.valuation_rate*(select sum(tabBin.actual_qty) from tabBin where tabItem.item_code = tabBin.item_code)) as \"Total Value:Currency:150\",\r\n    tabBin.valuation_rate as \"Valuation Rate:Currency:150\",\r\n    (select sum(tabBin.actual_qty) from tabBin where tabItem.item_code = tabBin.item_code) as \"Total QTY:FLOAT:100\",\r\n    (select sum(tabBin.actual_qty) from tabBin inner join tabWarehouse on tabWarehouse.name = tabBin.warehouse where tabItem.item_code = tabBin.item_code and tabWarehouse.summery_stock = 1) as \"Summery QTY:FLOAT:100\",\r\n    (select sum(tabBin.actual_qty) from tabBin inner join tabWarehouse on tabWarehouse.name = tabBin.warehouse where tabItem.item_code = tabBin.item_code and tabWarehouse.summery_stock = 0) as \"Not Summery QTY:FLOAT:100\"\r\nfrom \r\n    `tabItem` join `tabBin` on `tabItem`.name = `tabBin`.item_code \r\nwhere\r\n    tabItem.brand = %(brand)s\r\n    and `tabBin`.warehouse = \"\u0627\u0644\u0645\u062e\u0632\u0646 \u0627\u0644\u0631\u0626\u064a\u0633\u064a - IBC\"",
+ "ref_doctype": "Bin",
+ "report_name": "ssssssssssss",
+ "report_type": "Query Report",
+ "roles": [
+  {
+   "role": "Sales Supervisor"
+  },
+  {
+   "role": "Technical Support Manager"
+  },
+  {
+   "role": "Inqury Report"
+  },
+  {
+   "role": "Project Engineer"
+  },
+  {
+   "role": "Pre Sales Engineer Manager"
+  },
+  {
+   "role": "Technical Support Admin"
+  },
+  {
+   "role": "Pre Sales Engineer"
+  },
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "Project Engineer Team leader"
+  },
+  {
+   "role": "Technical Support Engineer"
+  },
+  {
+   "role": "Store keeper"
+  },
+  {
+   "role": "6october-sales"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Lead Manager"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Sales Project"
+  }
+ ]
+}
