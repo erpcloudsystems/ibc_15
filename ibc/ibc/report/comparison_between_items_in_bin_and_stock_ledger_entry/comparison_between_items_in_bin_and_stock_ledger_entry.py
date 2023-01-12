@@ -34,14 +34,14 @@ def execute(filters=None):
 		if frappe.db.exists("Stock Ledger Entry", {"item_code": item_dict.name, "warehouse": "المخزن الرئيسي - IBC"}):
 			qty = frappe.get_last_doc('Stock Ledger Entry', filters={"item_code": item_dict.name, "warehouse" : "المخزن الرئيسي - IBC"})
 			qty_after_transaction = qty.qty_after_transaction
-			row = {
-				'name' : item_dict.name,
-				'item_name' : item_dict.item_name,
-				'actual_qty' : item_dict.actual_qty,
-				'bin_warehouse' : item_dict.bin_warehouse,
-				'qty_after_transaction' : qty_after_transaction
-			}
-			result.append(row)
+		row = {
+			'name' : item_dict.name,
+			'item_name' : item_dict.item_name,
+			'actual_qty' : item_dict.actual_qty,
+			'bin_warehouse' : item_dict.bin_warehouse,
+			'qty_after_transaction' : qty_after_transaction
+		}
+		result.append(row)
 	return columns, result
 
 
