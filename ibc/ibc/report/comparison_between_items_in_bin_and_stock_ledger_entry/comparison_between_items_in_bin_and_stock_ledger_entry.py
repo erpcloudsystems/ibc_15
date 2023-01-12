@@ -14,15 +14,14 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	data = frappe.db.sql(f"""
 			SELECT `tabItem`.name as name, `tabItem`.item_name as item_name,
-				   `tabBin`.actual_qty as actual_qty, `tabBin`.warehouse as bin_warehouse
+				    `tabStock Ledger Entry`.warehouse as stockLE_warehouse
 			FROM `tabItem`
 
-			join `tabBin` on `tabBin`.item_code = `tabItem`.name
 			join `tabStock Ledger Entry` on `tabStock Ledger Entry`.item_code = `tabItem`.name
 
 
-			WHERE `tabBin`.warehouse = 'المخزن الرئيسي - IBC'
-			and `tabStock Ledger Entry`.posting_date >= '{from_date}'
+			WHERE `tabStock Ledger Entry`.warehouse = 'المخزن الرئيسي - IBC'
+			and `tabStock Ledger Entry`.posting_date >= '2022-11-01'
 			group by `tabItem`.name
 	""",as_dict = 1)
 
@@ -30,17 +29,15 @@ def execute(filters=None):
 	for item_dict in data:
 
 		qty_after_transaction = float(0)
-		ware = ''
 		if frappe.db.exists("Stock Ledger Entry", {"item_code": item_dict.name, "warehouse": "المخزن الرئيسي - IBC"}):
 			qty = frappe.get_last_doc('Stock Ledger Entry', filters={"item_code": item_dict.name, "warehouse" : "المخزن الرئيسي - IBC"})
 			qty_after_transaction = qty.qty_after_transaction
-		row = {
-			'name' : item_dict.name,
-			'item_name' : item_dict.item_name,
-			'actual_qty' : item_dict.actual_qty,
-			'bin_warehouse' : item_dict.bin_warehouse,
-			'qty_after_transaction' : qty_after_transaction
-		}
+
+			row = {
+				'name' : item_dict.name,
+				'item_name' : item_dict.item_name,
+				'qty_after_transaction' : qty_after_transaction
+			}
 		result.append(row)
 	return columns, result
 
