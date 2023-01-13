@@ -8,8 +8,8 @@ frappe.query_reports["Comparison Between Items in Bin and Stock Ledger Entry"] =
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			reqd: 1
-
+			reqd: 1,
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1)
 		},
 		{
 			fieldname: "to_date",
@@ -21,7 +21,7 @@ frappe.query_reports["Comparison Between Items in Bin and Stock Ledger Entry"] =
 			label: __("Warehouse"),
 			fieldtype: "Link",
 			options: "Warehouse",
-			reqd: 1
+
 		}
 	]
 };
