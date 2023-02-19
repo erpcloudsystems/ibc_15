@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Comparison Between Items in Bin and Stock Ledger Entry"] = {
+frappe.query_reports["Items in Stock Ledger Entry"] = {
 	"filters": [
 		{
 			fieldname: "from_date",
@@ -15,16 +15,12 @@ frappe.query_reports["Comparison Between Items in Bin and Stock Ledger Entry"] =
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			reqd: 1,
-
 			default: frappe.datetime.get_today()
 		},
 		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
 			fieldtype: "Link",
-			reqd: 1,
-
 			options: "Warehouse",
 
 		}

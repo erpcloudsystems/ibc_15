@@ -1,0 +1,48 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2023-01-15 12:04:20.744609",
+ "disable_prepared_report": 1,
+ "disabled": 1,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "IBC",
+ "modified": "2023-01-16 09:57:45.881493",
+ "modified_by": "Administrator",
+ "module": "Ibc",
+ "name": "Items in Stock Ledger Entry",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Stock Ledger Entry",
+ "report_name": "Items in Stock Ledger Entry",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Lead Manager"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Technical Support Manager"
+  },
+  {
+   "role": "Pre Sales Engineer Manager"
+  },
+  {
+   "role": "Project Engineer Team leader"
+  },
+  {
+   "role": "Brand Manager"
+  }
+ ]
+}

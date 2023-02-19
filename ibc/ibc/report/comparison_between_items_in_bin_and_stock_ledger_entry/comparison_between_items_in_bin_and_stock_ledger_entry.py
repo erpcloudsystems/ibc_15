@@ -4,6 +4,7 @@
 import frappe
 from frappe import msgprint, _
 from frappe.utils import flt
+from datetime import datetime
 
 
 def execute(filters=None):
@@ -13,32 +14,35 @@ def execute(filters=None):
 	warehouse = filters.get('warehouse')
 	columns = get_columns(filters)
 	data = frappe.db.sql(f"""
-			SELECT `tabItem`.name as name, `tabItem`.item_name as item_name
-			FROM `tabItem`
-
-
-
-
-			group by `tabItem`.name
+			SELECT  `tabBin`.item_code, `tabBin`.actual_qty, `tabBin`.warehouse
+			FROM `tabBin`
+			where `tabBin`.warehouse = 'المخزن الرئيسي - IBC'
 	""",as_dict = 1)
 
 	result = []
-	for item_dict in data:
 
-		qty_after_transaction = float(0)
-		if frappe.db.exists("Stock Ledger Entry", {"item_code": item_dict.name, "warehouse": "المخزن الرئيسي - IBC"}):
-			qty = frappe.get_last_doc('Stock Ledger Entry', filters={"item_code": item_dict.name, "warehouse" : "المخزن الرئيسي - IBC"})
-			qty_after_transaction = qty.qty_after_transaction
-			#'2022-12-01'
+	for item_dict in data:
+		q = float(0)
+		if frappe.db.exists("Stock Ledger Entry", {"item_code": item_dict.item_code, "warehouse": 'المخزن الرئيسي - IBC', 'posting_date' : ['>', from_date]}):
+
+			d = frappe.get_last_doc('Stock Ledger Entry', filters={"item_code": item_dict.item_code,
+				"warehouse" : 'المخزن الرئيسي - IBC', 'posting_date' : ['>', from_date]})
+
+
+
+		if d:
+			q = d.qty_after_transaction
+
+
 
 		row = {
-			'name' : item_dict.name,
-			'item_name' : item_dict.item_name,
-			# 'actual_qty' : item_dict.actual_qty,
-			# 'bin_warehouse' : item_dict.bin_warehouse,
-			'qty_after_transaction' : qty_after_transaction
+			'name' : item_dict.item_code,
+			'actual_qty' : item_dict.actual_qty,
+			'warehouse' : item_dict.warehouse,
+			'qty_after_transaction' : q,
 		}
 		result.append(row)
+
 	return columns, result
 
 
@@ -52,35 +56,22 @@ def get_columns(filters):
             "width": 100
         },
 		{
-            "label": _("Item Name"),
-            "fieldname": "item_name",
-            "fieldtype": "Data",
-            "width": 150
-        },
-		{
             "label": _("Bin Actual Qty"),
             "fieldname": "actual_qty",
             "fieldtype": "Data",
-            "width": 100
+            "width": 200
         },
 		{
-            "label": _("Bin Warehouse"),
-            "fieldname": "bin_warehouse",
+            "label": _("Warehouse"),
+            "fieldname": "warehouse",
             "fieldtype": "Link",
 			"options": "Warehouse",
-            "width": 200
+            "width": 150
         },
 		{
             "label": _("Stock Ledger Entry Qty After Transaction"),
             "fieldname": "qty_after_transaction",
             "fieldtype": "float",
-            "width": 200
-        },
-		{
-            "label": _("Stock Ledger Entry Warehouse"),
-            "fieldname": "stockLE_warehouse",
-            "fieldtype": "Link",
-			"options": "Warehouse",
             "width": 200
         },
 

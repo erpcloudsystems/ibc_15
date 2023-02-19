@@ -25,7 +25,18 @@ def get_columns():
             "fieldtype": "date",
             "width": 100
         },
-
+        {
+            "label": _("Status"),
+            "fieldname": "workflow_state",
+            "fieldtype": "Data",
+            "width": 130
+        },
+        {
+            "label": _("Approval Date"),
+            "fieldname": _("approval_date"),
+            "fieldtype": "date",
+            "width": 100
+        },
         {
             "label": _("Item Code"),
             "fieldname": "item_code",
@@ -89,8 +100,6 @@ def get_columns():
             "fieldtype": "Data",
             "width": 200
         },
-
-
         {
             "label": _("Installation Engineer"),
             "fieldname": _("full_name"),
@@ -117,6 +126,7 @@ def get_item_price_qty_data(filters):
     item_results = frappe.db.sql("""
                 select
                         `tabTicket`.name as name,
+                        `tabTicket`.workflow_state as workflow_state,
                         `tabTicket`.posting_date as posting_date,
                         `tabTicket Items`.item_code as item_code,
                         `tabTicket Items`.item_name as item_name,
@@ -132,7 +142,7 @@ def get_item_price_qty_data(filters):
                 from
                         `tabTicket` join `tabTicket Items` on `tabTicket`.name = `tabTicket Items`.parent
                 where
-                        `tabTicket`.docstatus = 1
+                        `tabTicket`.docstatus != 2
                 {conditions}
                 """.format(conditions=conditions), filters, as_dict=1)
 
@@ -144,10 +154,13 @@ def get_item_price_qty_data(filters):
     result = []
     if item_results:
         for item_dict in item_results:
+            approval_date = frappe.db.get_value('Comment', {'reference_name': item_dict.name, 'content': "Approved"}, ['creation'])
             full_name = frappe.db.get_value('User',item_dict.installation_engineer,'full_name')
             data = {
                 'name': item_dict.name,
                 'posting_date': item_dict.posting_date,
+                'workflow_state': item_dict.workflow_state,
+                'approval_date': approval_date,
                 'item_code': item_dict.item_code,
                 'item_name': item_dict.item_name,
                 'cost': item_dict.cost,
