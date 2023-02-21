@@ -150,17 +150,25 @@ def get_item_price_qty_data(filters):
 
     # buying_price_map = get_price_map(price_list_names, buying=1)
     # selling_price_map = get_price_map(price_list_names, selling=1)
-
+    aprovals_dates = frappe._dict(frappe.db.sql("""
+        SELECT reference_name, creation
+        FROM `tabComment`
+        WHERE content = "Approved"
+    """))
+    full_names = frappe._dict(frappe.db.sql("""
+        SELECT name, full_name
+        FROM `tabUser`
+    """))
     result = []
     if item_results:
         for item_dict in item_results:
-            approval_date = frappe.db.get_value('Comment', {'reference_name': item_dict.name, 'content': "Approved"}, ['creation'])
-            full_name = frappe.db.get_value('User',item_dict.installation_engineer,'full_name')
+            # approval_date = frappe.db.get_value('Comment', {'reference_name': item_dict.name, 'content': "Approved"}, ['creation'])
+            # full_name = frappe.db.get_value('User',item_dict.installation_engineer,'full_name')
             data = {
                 'name': item_dict.name,
                 'posting_date': item_dict.posting_date,
                 'workflow_state': item_dict.workflow_state,
-                'approval_date': approval_date,
+                'approval_date': aprovals_dates.get(item_dict.name),
                 'item_code': item_dict.item_code,
                 'item_name': item_dict.item_name,
                 'cost': item_dict.cost,
@@ -171,7 +179,7 @@ def get_item_price_qty_data(filters):
                 'customer_name': _(item_dict.customer_name),
                 'maintenanc_customer_name': item_dict.maintenanc_customer_name,
                 'spare_parts':item_dict.spare_parts,
-                'full_name': full_name,
+                'full_name': full_names.get(item_dict.installation_engineer),
 
             }
             result.append(data)

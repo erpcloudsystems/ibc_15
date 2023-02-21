@@ -593,6 +593,7 @@ doc_events = {
 		"validate": "ibc.doctype_triggers.stock.item_group.item_group.validate",
 		"before_save": "ibc.doctype_triggers.stock.item_group.item_group.before_save",
 		"on_update": "ibc.doctype_triggers.stock.item_group.item_group.on_update",
+		"after_rename": "ibc.doctype_triggers.stock.item_group.item_group.after_rename",
 	},
 	"Item Price": {
 		"before_insert": "ibc.doctype_triggers.stock.item_price.item_price.before_insert",

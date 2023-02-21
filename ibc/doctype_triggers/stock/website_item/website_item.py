@@ -14,7 +14,6 @@ def before_insert(doc, method=None):
 def after_insert(doc, method=None):
     if not doc.website_image:
         frappe.throw(" Please Insert An Image For The Item ")
-
     ## Get Single Values from Ecs Woocommerce seetings page
     price_list = frappe.db.get_single_value("Ecs Woocommerce", "price_list")
     woocommerce_user_key = frappe.db.get_single_value(

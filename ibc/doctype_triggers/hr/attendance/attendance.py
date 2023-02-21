@@ -33,10 +33,10 @@ def on_submit(doc, method=None):
                                 """,as_dict = 1)
 
     for chechin in get_checkin:
-        pp = frappe.get_last_doc('Payroll Policy', filters={"shift_type": 'test'})
+        pp = frappe.get_last_doc('Payroll Policy', filters={"shift_type": chechin.shift})
 
         for late in pp.late_table:
-            
+
             d = (datetime.datetime.min+late.from_time).time()
             d2 = (datetime.datetime.min+late.to_time).time()
 
