@@ -17,7 +17,10 @@ def before_validate(doc, method=None):
     pass
 @frappe.whitelist()
 def validate(doc, method=None):
-    doc.title = doc.remarks
+    if doc.payment_type == "Internal Transfer":
+        doc.title = "Transfer From " + str(doc.paid_from) + " To " + str(doc.paid_to)
+    else:
+        doc.title = doc.party_name
 @frappe.whitelist()
 def on_submit(doc, method=None):
     accounts = [

@@ -17,7 +17,10 @@ def before_validate(doc, method=None):
     pass
 @frappe.whitelist()
 def validate(doc, method=None):
-    doc.title = doc.user_remark
+    if doc.user_remark:
+        doc.title = doc.user_remark
+    else:
+        doc.title = doc.name
 @frappe.whitelist()
 def on_submit(doc, method=None):
     pass

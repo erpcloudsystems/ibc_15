@@ -24,7 +24,8 @@ frappe.query_reports["Spare Parts Report"] = {
 			"fieldtype": "Link",
 			"options" : "User",
 			"reqd": 0
-		}
+		},
+
 	]
 }
 

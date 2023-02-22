@@ -20,12 +20,6 @@ def get_columns():
             "width": 130
         },
         {
-            "label": _("Date"),
-            "fieldname": _("posting_date"),
-            "fieldtype": "date",
-            "width": 100
-        },
-        {
             "label": _("Status"),
             "fieldname": "workflow_state",
             "fieldtype": "Data",
@@ -45,7 +39,7 @@ def get_columns():
             "width": 100
         },
         {
-            "label": _("Item Name"),
+            "label": _("Description"),
             "fieldname": "item_name",
             "fieldtype": "Data",
             "width": 200
@@ -117,19 +111,21 @@ def get_data(filters, columns):
 
 def get_item_price_qty_data(filters):
     conditions = ""
+    conditions2 = ""
     if filters.get("from_date"):
-        conditions += " and `tabTicket`.posting_date>=%(from_date)s"
+        conditions2 += " and `tabComment`.creation>=%(from_date)s"
     if filters.get("to_date"):
-        conditions += " and `tabTicket`.posting_date<=%(to_date)s"
+        conditions2 += " and `tabComment`.creation<=%(to_date)s"
     if filters.get("installation_engineer"):
         conditions += " and `tabTicket`.installation_engineer =%(installation_engineer)s"
+
     item_results = frappe.db.sql("""
                 select
                         `tabTicket`.name as name,
                         `tabTicket`.workflow_state as workflow_state,
                         `tabTicket`.posting_date as posting_date,
                         `tabTicket Items`.item_code as item_code,
-                        `tabTicket Items`.item_name as item_name,
+                        `tabTicket Items`.issue_description as issue_description,
                         `tabTicket Items`.cost as cost,
                         `tabTicket Items`.new_accounts as new_accounts,
                         `tabTicket Items`.item_group as item_group,
@@ -154,7 +150,8 @@ def get_item_price_qty_data(filters):
         SELECT reference_name, creation
         FROM `tabComment`
         WHERE content = "Approved"
-    """))
+        {conditions2}
+    """.format(conditions2=conditions2), filters))
     full_names = frappe._dict(frappe.db.sql("""
         SELECT name, full_name
         FROM `tabUser`
@@ -164,24 +161,24 @@ def get_item_price_qty_data(filters):
         for item_dict in item_results:
             # approval_date = frappe.db.get_value('Comment', {'reference_name': item_dict.name, 'content': "Approved"}, ['creation'])
             # full_name = frappe.db.get_value('User',item_dict.installation_engineer,'full_name')
-            data = {
-                'name': item_dict.name,
-                'posting_date': item_dict.posting_date,
-                'workflow_state': item_dict.workflow_state,
-                'approval_date': aprovals_dates.get(item_dict.name),
-                'item_code': item_dict.item_code,
-                'item_name': item_dict.item_name,
-                'cost': item_dict.cost,
-                'new_accounts': item_dict.new_accounts,
-                'item_group': item_dict.item_group,
-                'new_internal': item_dict.new_internal,
-                'new_clear': _(item_dict.new_clear),
-                'customer_name': _(item_dict.customer_name),
-                'maintenanc_customer_name': item_dict.maintenanc_customer_name,
-                'spare_parts':item_dict.spare_parts,
-                'full_name': full_names.get(item_dict.installation_engineer),
+            if aprovals_dates.get(item_dict.name):
+                data = {
+                    'name': item_dict.name,
+                    'workflow_state': item_dict.workflow_state,
+                    'approval_date': aprovals_dates.get(item_dict.name),
+                    'item_code': item_dict.item_code,
+                    'item_name': item_dict.issue_description,
+                    'cost': item_dict.cost,
+                    'new_accounts': item_dict.new_accounts,
+                    'item_group': item_dict.item_group,
+                    'new_internal': item_dict.new_internal,
+                    'new_clear': _(item_dict.new_clear),
+                    'customer_name': _(item_dict.customer_name),
+                    'maintenanc_customer_name': item_dict.maintenanc_customer_name,
+                    'spare_parts':item_dict.spare_parts,
+                    'full_name': full_names.get(item_dict.installation_engineer),
 
-            }
-            result.append(data)
+                }
+                result.append(data)
 
     return result
