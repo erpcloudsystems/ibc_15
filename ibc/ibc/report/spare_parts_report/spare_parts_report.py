@@ -23,26 +23,33 @@ def get_columns():
             "label": _("Status"),
             "fieldname": "workflow_state",
             "fieldtype": "Data",
-            "width": 130
+            "width": 100
         },
         {
             "label": _("Approval Date"),
             "fieldname": _("approval_date"),
             "fieldtype": "date",
-            "width": 100
+            "width": 170
         },
         {
-            "label": _("Item Code"),
+            "label": _("Item"),
             "fieldname": "item_code",
             "options": "Item",
             "fieldtype": "Link",
-            "width": 100
+            "width": 150
         },
         {
             "label": _("Description"),
-            "fieldname": "item_name",
+            "fieldname": "description",
             "fieldtype": "Data",
             "width": 200
+        },
+        {
+            "label": _("Item Name"),
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "width": 200,
+            "hidden": 1
         },
 		{
 			"label": _("Item Group"),
@@ -125,7 +132,8 @@ def get_item_price_qty_data(filters):
                         `tabTicket`.workflow_state as workflow_state,
                         `tabTicket`.posting_date as posting_date,
                         `tabTicket Items`.item_code as item_code,
-                        `tabTicket Items`.issue_description as issue_description,
+                        `tabTicket Items`.item_name as item_name,
+                        `tabTicket Items`.description as description,
                         `tabTicket Items`.cost as cost,
                         `tabTicket Items`.new_accounts as new_accounts,
                         `tabTicket Items`.item_group as item_group,
@@ -139,23 +147,24 @@ def get_item_price_qty_data(filters):
                         `tabTicket` join `tabTicket Items` on `tabTicket`.name = `tabTicket Items`.parent
                 where
                         `tabTicket`.docstatus != 2
-                {conditions}
+                        {conditions}
+                order by
+                        `tabTicket`.name desc
                 """.format(conditions=conditions), filters, as_dict=1)
 
-    # price_list_names = list(set([item.price_list_name for item in item_results]))
 
-    # buying_price_map = get_price_map(price_list_names, buying=1)
-    # selling_price_map = get_price_map(price_list_names, selling=1)
     aprovals_dates = frappe._dict(frappe.db.sql("""
         SELECT reference_name, creation
         FROM `tabComment`
         WHERE content = "Approved"
         {conditions2}
     """.format(conditions2=conditions2), filters))
+
     full_names = frappe._dict(frappe.db.sql("""
         SELECT name, full_name
         FROM `tabUser`
     """))
+
     result = []
     if item_results:
         for item_dict in item_results:
@@ -167,7 +176,8 @@ def get_item_price_qty_data(filters):
                     'workflow_state': item_dict.workflow_state,
                     'approval_date': aprovals_dates.get(item_dict.name),
                     'item_code': item_dict.item_code,
-                    'item_name': item_dict.issue_description,
+                    'description': item_dict.description,
+                    'item_name': item_dict.item_name,
                     'cost': item_dict.cost,
                     'new_accounts': item_dict.new_accounts,
                     'item_group': item_dict.item_group,
@@ -177,7 +187,6 @@ def get_item_price_qty_data(filters):
                     'maintenanc_customer_name': item_dict.maintenanc_customer_name,
                     'spare_parts':item_dict.spare_parts,
                     'full_name': full_names.get(item_dict.installation_engineer),
-
                 }
                 result.append(data)
 
