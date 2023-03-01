@@ -24,7 +24,7 @@ def get_columns():
 		_("Item Name") + ":Data:250",
 		_("Description") + "::300",
 		_("Current Qty") + ":Float:100",
-		_("Price List Rate") + ":Currency:120"
+		_("Valuation Rate") + ":Float:100"
 	]
 
 	return columns
@@ -33,6 +33,7 @@ def get_columns():
 def get_total_stock(filters):
 	conditions = ""
 	columns = ""
+	columnss = ""
 	default_price_list = frappe.db.get_single_value('Selling Settings', 'selling_price_list')
 
 	if filters.get("group_by") == "Warehouse":
@@ -43,9 +44,16 @@ def get_total_stock(filters):
 
 		conditions += " GROUP BY ledger.warehouse, item.item_code"
 		columns += "'' as company, ledger.warehouse"
+		columnss += "sum(ledger.actual_qty) as actual_qty,"
+		columnss += "sum(ledger.valuation_rate)"
 	else:
 		conditions += " GROUP BY warehouse.company, item.item_code"
 		columns += " warehouse.company, '' as warehouse"
+		columnss += " (select sum(ledger.actual_qty) from `tabBin` AS ledger where ledger.item_code = item.item_code) as actual_qty "
+		columnss += " ,(select sum(ledger.valuation_rate) from `tabBin` AS ledger where ledger.warehouse = 'المخزن الرئيسي - IBC' and ledger.item_code = item.item_code)"
+
+
+
 
 	return frappe.db.sql(
 		"""
@@ -54,8 +62,7 @@ def get_total_stock(filters):
 				item.item_code,
 				item.item_name,
 				item.description,
-				sum(ledger.actual_qty) as actual_qty,
-				price.price_list_rate
+				%s
 			FROM
 				`tabBin` AS ledger
 			INNER JOIN `tabItem` AS item
@@ -65,8 +72,6 @@ def get_total_stock(filters):
 			INNER JOIN `tabItem Price` AS price
 				ON ledger.item_code = price.item_code
 
-			WHERE
-				warehouse.summery_stock = 1
-				and price.price_list = '{price_list}' %s""".format(price_list=default_price_list)
-		% (columns, conditions)
+			WHERE price.price_list = '{price_list}' %s""".format(price_list=default_price_list)
+		% (columns,columnss, conditions)
 	)
