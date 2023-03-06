@@ -135,6 +135,15 @@ def get_item_price_qty_data(filters):
 			ifnull(`tabItem`.valuation_rate,0) as value,
 			ifnull(`tabItem`.brand,0) as brand,
 			ifnull(`tabItem`.item_group,0) as item_group,
+			(ifnull((select sum(stock_value_difference)
+				from `tabStock Ledger Entry` left join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
+				where `tabWarehouse`.summery_stock = 1
+				and `tabStock Ledger Entry`.item_code = `tabItem`.item_code
+				and `tabStock Ledger Entry`.voucher_type = "Delivery Note"
+				and `tabStock Ledger Entry`.posting_date >= %(from_date)s
+				and `tabStock Ledger Entry`.posting_date <= %(to_date)s
+				and `tabStock Ledger Entry`.actual_qty <0
+				and `tabStock Ledger Entry`.is_cancelled = 0),0)) as delivered_v,
 			(ifnull((select sum(actual_qty)
 				from `tabStock Ledger Entry` left join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
 				where `tabWarehouse`.summery_stock = 1
@@ -174,7 +183,6 @@ def get_item_price_qty_data(filters):
 			from
 			`tabItem`
 			where `tabItem`.name = '3415'
-			limit 1
 		""", filters , as_dict=1)
 
 	result = []
@@ -186,6 +194,7 @@ def get_item_price_qty_data(filters):
 				'brand': (item_dict.brand),
 				'item_name': (item_dict.item_name),
 				'delivered': (item_dict.delivered),
+				'delivered_v': (item_dict.delivered_v),
 				'sales_return': (item_dict.sales_return),
 				'purchase': (item_dict.purchase),
 				'purchase_return': (item_dict.purchase_return),
@@ -204,6 +213,9 @@ def get_item_price_qty_data(filters):
 			s2 = 0
 			frate = 0
 			v_rate = 0
+			sales_in_qty_value = 0
+			purchase_in_qty_value = 0
+			purchase_in_re_qty_value = 0
 			for warehouse in warehouses:
 				warehousee = warehouse.name
 				opening = frappe.db.sql("""select
@@ -238,11 +250,60 @@ def get_item_price_qty_data(filters):
 					s2 += tqty.res * tqty.frate
 					frate += tqty.frate
 
-			frappe.throw(str(frate))
-			data['delivered_v'] =  (item_dict.delivered *  frate)
-			data['purchase_v'] = (item_dict.purchase * ((item_dict.value + frat) / 2))
-			data['sales_return_v'] = (item_dict.sales_return * ((item_dict.value + frat) / 2))
-			data['purchase_return_v'] = (item_dict.purchase_return * ((item_dict.value + frat) / 2))
+				sales_in_qty = frappe.db.sql("""select
+							actual_qty as qty,
+							valuation_rate as v_rate
+							from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
+							where
+							`tabStock Ledger Entry`.item_code = %s
+							and `tabStock Ledger Entry`.voucher_type = "Sales Invoice"
+							and `tabStock Ledger Entry`.actual_qty >0
+							and `tabStock Ledger Entry`.warehouse = %s
+							and `tabStock Ledger Entry`.posting_date >= %s
+							and `tabStock Ledger Entry`.posting_date <= %s
+							and `tabStock Ledger Entry`.is_cancelled = 0
+							ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC """,
+										(item, warehousee, from_date, to_date), as_dict=1)
+				for qt in sales_in_qty:
+					sales_in_qty_value += qt.qty * qt.v_rate
+
+				purchase_in_qty = frappe.db.sql("""select
+							actual_qty as qty,
+							valuation_rate as v_rate
+							from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
+							where
+							`tabStock Ledger Entry`.item_code = %s
+							and `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
+							and `tabStock Ledger Entry`.actual_qty >0
+							and `tabStock Ledger Entry`.warehouse = %s
+							and `tabStock Ledger Entry`.posting_date >= %s
+							and `tabStock Ledger Entry`.posting_date <= %s
+							and `tabStock Ledger Entry`.is_cancelled = 0
+							ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC """,
+										(item, warehousee, from_date, to_date), as_dict=1)
+				for qt in purchase_in_qty:
+					purchase_in_qty_value += qt.qty * qt.v_rate
+
+				purchase_in_re_qty = frappe.db.sql("""select
+							actual_qty as qty,
+							valuation_rate as v_rate
+							from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
+							where
+							`tabStock Ledger Entry`.item_code = %s
+							and `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
+							and `tabStock Ledger Entry`.actual_qty <0
+							and `tabStock Ledger Entry`.warehouse = %s
+							and `tabStock Ledger Entry`.posting_date >= %s
+							and `tabStock Ledger Entry`.posting_date <= %s
+							and `tabStock Ledger Entry`.is_cancelled = 0
+							ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC """,
+										(item, warehousee, from_date, to_date), as_dict=1)
+				for qt in purchase_in_re_qty:
+					purchase_in_re_qty_value += qt.qty * qt.v_rate
+
+			data['purchase_v'] = purchase_in_qty_value
+			data['sales_return_v'] = sales_in_qty_value
+			data['purchase_return_v'] = purchase_in_re_qty_value
 			data['opening'] = s
 			data['opening_v'] = frat
 			data['balance'] = s1
