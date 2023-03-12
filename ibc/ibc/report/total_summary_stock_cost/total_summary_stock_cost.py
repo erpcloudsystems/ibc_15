@@ -22,6 +22,7 @@ def get_columns():
 		_("Warehouse") + ":Link/Warehouse:150",
 		_("Item") + ":Link/Item:90",
 		_("Item Name") + ":Data:250",
+		_("Item Group") + ":Data:250",
 		_("Description") + "::300",
 		_("Current Qty") + ":Float:100",
 		_("Valuation Rate") + ":Float:100"
@@ -61,6 +62,7 @@ def get_total_stock(filters):
 				%s,
 				item.item_code,
 				item.item_name,
+				item.item_group,
 				item.description,
 				%s
 			FROM

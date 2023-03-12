@@ -22,6 +22,7 @@ def get_columns():
 		_("Warehouse") + ":Link/Warehouse:150",
 		_("Item") + ":Link/Item:90",
 		_("Item Name") + ":Data:250",
+		_("Item Group") + ":Data:250",
 		_("Description") + "::300",
 		_("Current Qty") + ":Float:100",
 		_("Price List Rate") + ":Currency:120"
@@ -53,6 +54,7 @@ def get_total_stock(filters):
 				%s,
 				item.item_code,
 				item.item_name,
+				item.item_group,
 				item.description,
 				sum(ledger.actual_qty) as actual_qty,
 				price.price_list_rate

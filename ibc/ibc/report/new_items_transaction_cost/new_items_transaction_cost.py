@@ -182,7 +182,6 @@ def get_item_price_qty_data(filters):
 				and `tabStock Ledger Entry`.is_cancelled = 0),0)) as purchase_return
 			from
 			`tabItem`
-			where `tabItem`.name = '3415'
 		""", filters , as_dict=1)
 
 	result = []

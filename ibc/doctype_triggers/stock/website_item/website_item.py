@@ -63,8 +63,15 @@ def after_insert(doc, method=None):
 
     categories = []
     categories.append({"id": category_id})
-    if frappe.db.exists("Website Item Group", {"parent": doc.name}, "item_group"):
-        items_groups = frappe.db.get_list("Website Item Group", {"parent": doc.name}, "item_group")
+    if frappe.db.exists(
+        "Website Item Group", {"parent": doc.name}, "item_group", parent="Website Item"
+    ):
+        items_groups = frappe.db.get_list(
+            "Website Item Group",
+            {"parent": doc.name},
+            "item_group",
+            parent="Website Item",
+        )
         for item_group in items_groups:
             category_ids = frappe.db.get_value(
                 "Item Group", item_group["item_group"], "category_id"
@@ -159,12 +166,18 @@ def validate(doc, method=None):
         categories = []
         categories.append({"id": category_id})
         if frappe.db.exists("Website Item Group", {"parent": doc.name}, "item_group"):
-            items_groups = frappe.db.get_list(
-                "Website Item Group", {"parent": doc.name}, "item_group"
-             )
+            items_groups = frappe.db.get_all(
+                "Website Item Group",
+                {"parent": doc.name},
+                "item_group",
+
+            )
             for item_group in items_groups:
                 category_ids = frappe.db.get_value(
-                     "Item Group", item_group["item_group"], "category_id"
+                    "Item Group",
+                    item_group["item_group"],
+                    "category_id",
+
                 )
 
                 categories.append({"id": category_ids})
@@ -190,7 +203,9 @@ def validate(doc, method=None):
             auth=headeroauth,
             headers=headers,
         )
-        frappe.msgprint(response.content)
+        encode_data = json.dumps(response.json(), ensure_ascii=False).encode("utf8")
+        response = encode_data.decode()
+        frappe.msgprint(response)
 
 
 @frappe.whitelist()
