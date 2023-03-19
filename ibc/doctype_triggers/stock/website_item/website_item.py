@@ -64,13 +64,13 @@ def after_insert(doc, method=None):
     categories = []
     categories.append({"id": category_id})
     if frappe.db.exists(
-        "Website Item Group", {"parent": doc.name}, "item_group", parent="Website Item"
+        "Website Item Group", {"parent": doc.name}, "item_group"
     ):
-        items_groups = frappe.db.get_list(
+        items_groups = frappe.db.get_all(
             "Website Item Group",
             {"parent": doc.name},
             "item_group",
-            parent="Website Item",
+
         )
         for item_group in items_groups:
             category_ids = frappe.db.get_value(
