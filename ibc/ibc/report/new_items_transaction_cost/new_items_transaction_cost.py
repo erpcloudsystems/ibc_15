@@ -43,7 +43,7 @@ def get_columns():
 		{
 			"label": _("Opening"),
 			"fieldname": "opening",
-			"fieldtype": "Float",
+			"fieldtype": "Data",
 			"width": 150
 		},
 		{
@@ -121,194 +121,133 @@ def get_data(filters, columns):
 	return item_price_qty_data
 
 
+def hash_query(filters, doctype, sum_of, conditions):
+	return  frappe._dict(frappe.db.sql(
+		"""
+		select `tabStock Ledger Entry`.item_code, sum({sum_of}) as sum
+				from `tabStock Ledger Entry`  join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
+				where `tabWarehouse`.summery_stock = 1
+				and `tabStock Ledger Entry`.voucher_type = "{doctype}"
+				and `tabStock Ledger Entry`.posting_date >= "{from_date}"
+				and `tabStock Ledger Entry`.posting_date <= "{to_date}"
+				and {conditions}
+				and `tabStock Ledger Entry`.is_cancelled = 0
+				GROUP BY `tabStock Ledger Entry`.item_code
+		""".format(doctype=doctype, sum_of=sum_of, conditions=conditions, from_date= filters.get("from_date"), to_date=filters.get("to_date")) ))
 
+def retransform(item_qty_in_allWarehouses1, item_valuationRate_in_allWarehouses1):
+	body = {}
+	for row in item_qty_in_allWarehouses1:
+		body[row.item_code] = {
+			"actual_qty": row.actual_qty,
+		}
+	for row in item_valuationRate_in_allWarehouses1:
+		body[row.item_code]["valuation_rate"] =  row.valuation_rate
+
+	return body
 def get_item_price_qty_data(filters):
-	conditions = ""
-	conditions1 = ""
-#vals = [filters.get("metal_ws") , filters.get("leather_ws") , filters.get("natural_ws") , filters.get("artificial_ws") , filters.get("metal_ws") , filters.get("supplier_ws") , filters.get("imported_ws")]
-
 
 	item_results = frappe.db.sql("""
     SELECT distinct
-			ifnull(`tabItem`.name,0) as item_code,
-			ifnull(`tabItem`.item_name,0) as item_name,
+			`tabItem`.name as item_code,
+			`tabItem`.item_name as item_name,
 			ifnull(`tabItem`.valuation_rate,0) as value,
-			ifnull(`tabItem`.brand,0) as brand,
-			ifnull(`tabItem`.item_group,0) as item_group,
-			(ifnull((select sum(stock_value_difference)
-				from `tabStock Ledger Entry` left join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
-				where `tabWarehouse`.summery_stock = 1
-				and `tabStock Ledger Entry`.item_code = `tabItem`.item_code
-				and `tabStock Ledger Entry`.voucher_type = "Delivery Note"
-				and `tabStock Ledger Entry`.posting_date >= %(from_date)s
-				and `tabStock Ledger Entry`.posting_date <= %(to_date)s
-				and `tabStock Ledger Entry`.actual_qty <0
-				and `tabStock Ledger Entry`.is_cancelled = 0),0)) as delivered_v,
-			(ifnull((select sum(actual_qty)
-				from `tabStock Ledger Entry` left join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
-				where `tabWarehouse`.summery_stock = 1
-				and `tabStock Ledger Entry`.item_code = `tabItem`.item_code
-				and `tabStock Ledger Entry`.voucher_type = "Delivery Note"
-				and `tabStock Ledger Entry`.posting_date >= %(from_date)s
-				and `tabStock Ledger Entry`.posting_date <= %(to_date)s
-				and `tabStock Ledger Entry`.actual_qty <0
-				and `tabStock Ledger Entry`.is_cancelled = 0),0)) as delivered,
-			(ifnull((select sum(actual_qty)
-				from `tabStock Ledger Entry` left join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
-				where `tabWarehouse`.summery_stock = 1
-				and `tabStock Ledger Entry`.item_code = `tabItem`.item_code
-				and `tabStock Ledger Entry`.voucher_type = "Sales Invoice"
-				and `tabStock Ledger Entry`.posting_date >= %(from_date)s
-				and `tabStock Ledger Entry`.posting_date <= %(to_date)s
-				and `tabStock Ledger Entry`.actual_qty >0
-				and `tabStock Ledger Entry`.is_cancelled = 0),0)) as sales_return,
-			(ifnull((select sum(actual_qty)
-				from `tabStock Ledger Entry` left join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
-				where `tabWarehouse`.summery_stock = 1
-				and `tabStock Ledger Entry`.item_code = `tabItem`.item_code
-				and `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
-				and `tabStock Ledger Entry`.posting_date >= %(from_date)s
-				and `tabStock Ledger Entry`.posting_date <= %(to_date)s
-				and `tabStock Ledger Entry`.actual_qty >0
-				and `tabStock Ledger Entry`.is_cancelled = 0),0)) as purchase,
-			(ifnull((select sum(actual_qty)
-				from `tabStock Ledger Entry` left join `tabWarehouse` on `tabWarehouse`.name = `tabStock Ledger Entry`.warehouse
-				where `tabWarehouse`.summery_stock = 1
-				and `tabStock Ledger Entry`.item_code = `tabItem`.item_code
-				and `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
-				and `tabStock Ledger Entry`.posting_date >= %(from_date)s
-				and `tabStock Ledger Entry`.posting_date <= %(to_date)s
-				and `tabStock Ledger Entry`.actual_qty <0
-				and `tabStock Ledger Entry`.is_cancelled = 0),0)) as purchase_return
+			`tabItem`.brand as brand,
+			`tabItem`.item_group as item_group
 			from
 			`tabItem`
 		""", filters , as_dict=1)
 
 	result = []
-	if item_results:
-		for item_dict in item_results:
-
-			data = {
-				'item_code': item_dict.item_code,
-				'brand': (item_dict.brand),
-				'item_name': (item_dict.item_name),
-				'delivered': (item_dict.delivered),
-				'delivered_v': (item_dict.delivered_v),
-				'sales_return': (item_dict.sales_return),
-				'purchase': (item_dict.purchase),
-				'purchase_return': (item_dict.purchase_return),
-				'item_group': (item_dict.item_group)
-			}
-			to_date = filters.get("to_date")
-			from_date = filters.get("from_date")
-			item = item_dict.item_code
-
-			warehouses = frappe.db.sql("""select name as name from `tabWarehouse` where disabled = 0 """, as_dict=1)
-
-			# Start getting all qty
-			s = 0
-			s1 = 0
-			frat = 0
-			s2 = 0
-			frate = 0
-			v_rate = 0
-			sales_in_qty_value = 0
-			purchase_in_qty_value = 0
-			purchase_in_re_qty_value = 0
-			for warehouse in warehouses:
-				warehousee = warehouse.name
-				opening = frappe.db.sql("""select
-							qty_after_transaction as res,
-							valuation_rate as frate
-							from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
-							where
-							`tabStock Ledger Entry`.item_code = %s
-							and `tabStock Ledger Entry`.warehouse = %s
-							and `tabStock Ledger Entry`.posting_date <= %s
+	delivered = hash_query(filters,"Delivery Note", "actual_qty", conditions = " `tabStock Ledger Entry`.actual_qty <0 ")
+	delivered_v = hash_query(filters,"Delivery Note", "stock_value_difference", conditions = " `tabStock Ledger Entry`.actual_qty <0 ")
+	sales_return = hash_query(filters,"Sales Invoice", "actual_qty", conditions = " `tabStock Ledger Entry`.actual_qty >0 ")
+	purchase = hash_query(filters,"Purchase Invoice", "actual_qty", conditions = " `tabStock Ledger Entry`.actual_qty >0 ")
+	purchase_return = hash_query(filters,"Purchase Invoice", "actual_qty", conditions = " `tabStock Ledger Entry`.actual_qty >0 ")
+	item_qty_in_allWarehouses = frappe.db.sql("""select
+							item_code,
+							sum(actual_qty) as actual_qty
+							from `tabStock Ledger Entry`
+							WHERE `tabStock Ledger Entry`.posting_date <= "{from_date}"
+							GROUP BY item_code""".format(from_date=filters.get("from_date")), as_dict=1)
+	item_valuationRate_in_allWarehouses = frappe.db.sql("""select
+							item_code,
+							AVG(valuation_rate)  as valuation_rate
+							from `tabStock Ledger Entry`
+							WHERE `tabStock Ledger Entry`.posting_date <= "{from_date}"
 							and `tabStock Ledger Entry`.is_cancelled = 0
-							ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC LIMIT 1""",
-										(item, warehousee, from_date), as_dict=1)
-				for tqty in opening:
-					s += tqty.res
-					frat += tqty.res*tqty.frate
+							GROUP BY item_code""".format(from_date=filters.get("from_date")), as_dict=1)
+	
+	new_item_qty_in_allWarehouses = retransform(item_qty_in_allWarehouses, item_valuationRate_in_allWarehouses)
 
-
-				balance = frappe.db.sql("""select
-											qty_after_transaction as res,
-											valuation_rate as frate
-											from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
-											where
-											`tabStock Ledger Entry`.item_code = %s
-											and `tabStock Ledger Entry`.warehouse = %s
-											and `tabStock Ledger Entry`.posting_date <= %s
-											and `tabStock Ledger Entry`.is_cancelled = 0
-											ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC LIMIT 1""",
-										(item, warehousee, to_date), as_dict=1)
-				for tqty in balance:
-					s1 += tqty.res
-					s2 += tqty.res * tqty.frate
-					frate += tqty.frate
-
-				sales_in_qty = frappe.db.sql("""select
-							actual_qty as qty,
-							valuation_rate as v_rate
-							from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
-							where
-							`tabStock Ledger Entry`.item_code = %s
+	item_qty_in_allWarehouses_balance_lessthan = frappe.db.sql("""select
+							item_code,
+							sum(actual_qty) as actual_qty
+							from `tabStock Ledger Entry`
+							WHERE `tabStock Ledger Entry`.posting_date <= "{to_date}"
+							GROUP BY item_code""".format(to_date=filters.get("to_date")), as_dict=1)
+	item_valuationRate_balance_allWarehouses = frappe.db.sql("""select
+							item_code,
+							AVG(valuation_rate)  as valuation_rate
+							from `tabStock Ledger Entry`
+							WHERE `tabStock Ledger Entry`.posting_date <= "{to_date}"
+							and `tabStock Ledger Entry`.is_cancelled = 0
+							GROUP BY item_code""".format(to_date=filters.get("to_date")), as_dict=1)
+	sales_in_qty = frappe._dict(frappe.db.sql("""select
+							item_code,
+							SUM(actual_qty * valuation_rate) as sales_in_qty_value
+							from `tabStock Ledger Entry`
+							where 1 = 1
 							and `tabStock Ledger Entry`.voucher_type = "Sales Invoice"
 							and `tabStock Ledger Entry`.actual_qty >0
-							and `tabStock Ledger Entry`.warehouse = %s
-							and `tabStock Ledger Entry`.posting_date >= %s
-							and `tabStock Ledger Entry`.posting_date <= %s
+							and `tabStock Ledger Entry`.posting_date >= "{from_date}"
+							and `tabStock Ledger Entry`.posting_date <= "{to_date}"
 							and `tabStock Ledger Entry`.is_cancelled = 0
-							ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC """,
-										(item, warehousee, from_date, to_date), as_dict=1)
-				for qt in sales_in_qty:
-					sales_in_qty_value += qt.qty * qt.v_rate
-
-				purchase_in_qty = frappe.db.sql("""select
-							actual_qty as qty,
-							valuation_rate as v_rate
-							from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
-							where
-							`tabStock Ledger Entry`.item_code = %s
-							and `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
+							GROUP BY `tabStock Ledger Entry`.item_code
+							 """.format(from_date=filters.get("from_date"), to_date=filters.get("to_date"))))
+	purchase_in_qty = frappe._dict(frappe.db.sql("""select
+							item_code,
+							SUM(actual_qty * valuation_rate) as purchase_in_qty_value
+							from `tabStock Ledger Entry`
+							where  `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
 							and `tabStock Ledger Entry`.actual_qty >0
-							and `tabStock Ledger Entry`.warehouse = %s
-							and `tabStock Ledger Entry`.posting_date >= %s
-							and `tabStock Ledger Entry`.posting_date <= %s
+							and `tabStock Ledger Entry`.posting_date >= "{from_date}"
+							and `tabStock Ledger Entry`.posting_date <= "{to_date}"
 							and `tabStock Ledger Entry`.is_cancelled = 0
-							ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC """,
-										(item, warehousee, from_date, to_date), as_dict=1)
-				for qt in purchase_in_qty:
-					purchase_in_qty_value += qt.qty * qt.v_rate
-
-				purchase_in_re_qty = frappe.db.sql("""select
-							actual_qty as qty,
-							valuation_rate as v_rate
-							from `tabStock Ledger Entry` join `tabWarehouse` on `tabStock Ledger Entry`.warehouse = `tabWarehouse`.name
-							where
-							`tabStock Ledger Entry`.item_code = %s
-							and `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
+							GROUP BY `tabStock Ledger Entry`.item_code
+							 """.format(from_date=filters.get("from_date"), to_date=filters.get("to_date"))))
+	purchase_in_re_qty = frappe._dict(frappe.db.sql("""select
+							item_code,
+							SUM(actual_qty * valuation_rate) as purchase_in_re_qty_value
+							from `tabStock Ledger Entry`
+							where `tabStock Ledger Entry`.voucher_type = "Purchase Invoice"
 							and `tabStock Ledger Entry`.actual_qty <0
-							and `tabStock Ledger Entry`.warehouse = %s
-							and `tabStock Ledger Entry`.posting_date >= %s
-							and `tabStock Ledger Entry`.posting_date <= %s
+							and `tabStock Ledger Entry`.posting_date >= "{from_date}"
+							and `tabStock Ledger Entry`.posting_date <= "{to_date}"
 							and `tabStock Ledger Entry`.is_cancelled = 0
-							ORDER BY `tabStock Ledger Entry`.posting_date DESC, `tabStock Ledger Entry`.posting_time DESC , `tabStock Ledger Entry`.creation DESC """,
-										(item, warehousee, from_date, to_date), as_dict=1)
-				for qt in purchase_in_re_qty:
-					purchase_in_re_qty_value += qt.qty * qt.v_rate
-
-			data['purchase_v'] = purchase_in_qty_value
-			data['sales_return_v'] = sales_in_qty_value
-			data['purchase_return_v'] = purchase_in_re_qty_value
-			data['opening'] = s
-			data['opening_v'] = frat
-			data['balance'] = s1
-			data['balance_v'] = s2
-
-
+							GROUP BY `tabStock Ledger Entry`.item_code
+							 """.format(from_date=filters.get("from_date"), to_date=filters.get("to_date"))))
+	new_item_qtybalance_in_allWarehouses = retransform(item_qty_in_allWarehouses_balance_lessthan, item_valuationRate_balance_allWarehouses)
+	if item_results:
+		for item_dict in item_results:
+			data = {
+				'brand': (item_dict.brand),
+				'item_code': item_dict.item_code,
+				'item_name': (item_dict.item_name),
+				'delivered': delivered.get(item_dict.item_code),
+				'delivered_v': delivered_v.get(item_dict.item_code),
+				'sales_return': sales_return.get(item_dict.item_code),
+				'purchase': purchase.get(item_dict.item_code),
+				'purchase_return': purchase_return.get(item_dict.item_code),
+				'item_group': (item_dict.item_group)
+			}
+			data['sales_return_v'] = sales_in_qty.get(item_dict.item_code)
+			data['purchase_v'] = purchase_in_qty.get(item_dict.item_code)
+			data['purchase_return_v'] = purchase_in_re_qty.get(item_dict.item_code)
+			data['opening'] = new_item_qty_in_allWarehouses.get(item_dict.item_code)["actual_qty"] if new_item_qty_in_allWarehouses.get(item_dict.item_code) else new_item_qty_in_allWarehouses.get(item_dict.item_code)
+			data['opening_v'] = new_item_qty_in_allWarehouses.get(item_dict.item_code).get("actual_qty") * new_item_qty_in_allWarehouses.get(item_dict.item_code).get("valuation_rate", 0) if new_item_qty_in_allWarehouses.get(item_dict.item_code) else new_item_qty_in_allWarehouses.get(item_dict.item_code)
+			data['balance'] = new_item_qtybalance_in_allWarehouses.get(item_dict.item_code).get("actual_qty") if new_item_qtybalance_in_allWarehouses.get(item_dict.item_code) else 0
+			data['balance_v'] = new_item_qtybalance_in_allWarehouses.get(item_dict.item_code).get("actual_qty") * new_item_qtybalance_in_allWarehouses.get(item_dict.item_code).get("valuation_rate", 0) if new_item_qtybalance_in_allWarehouses.get(item_dict.item_code) else 0
 			result.append(data)
 
 	return result
