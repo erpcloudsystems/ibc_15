@@ -22,4 +22,3 @@ frappe.query_reports["Brand Added Value Report"] = {
 		}
 	]
 };
-
