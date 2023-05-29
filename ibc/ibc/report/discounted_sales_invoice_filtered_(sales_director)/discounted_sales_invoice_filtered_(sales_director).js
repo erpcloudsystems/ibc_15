@@ -31,7 +31,7 @@ frappe.query_reports["Discounted Sales invoice Filtered (Sales Director)"] = {
 		"get_query": function() {
 			return {
 				"filters": {
-					"parent_sales_person": ["in", ['Sales Director']],
+					"parent_sales_person": ["in", ['Sales Director','6th October','Alexandria','Head Office','Demo','Hurgada']],
 				}
 			}
 		}

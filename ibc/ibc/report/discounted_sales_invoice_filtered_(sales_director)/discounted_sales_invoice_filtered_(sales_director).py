@@ -160,7 +160,7 @@ def get_item_price_qty_data(filters):
 										join `tabSales Person` on `tabSales Person`.name = `tabSales Invoice`.sales_person
 									where
 										`tabSales Invoice`.docstatus = 1
-									and `tabSales Person`.parent_sales_person in ('Sales Director')
+									and `tabSales Person`.parent_sales_person in ('Sales Director','6th October','Alexandria','Head Office','Demo','Hurgada')
 									and {conditions}
 								"""
 		.format(conditions=conditions), filters, as_dict=1)
