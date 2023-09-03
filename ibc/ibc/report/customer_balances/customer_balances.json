@@ -10,20 +10,17 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "IBC",
- "modified": "2022-06-07 11:38:09.690833",
+ "modified": "2023-08-31 16:45:40.554214",
  "modified_by": "Administrator",
  "module": "Ibc",
  "name": "Customer_Balances",
  "owner": "Administrator",
- "prepared_report": 0,
+ "prepared_report": 1,
  "ref_doctype": "GL Entry",
  "reference_report": "Trial Balance for Party",
  "report_name": "Customer_Balances",
  "report_type": "Script Report",
  "roles": [
-  {
-   "role": "Customer report only"
-  },
   {
    "role": "Accounts User"
   },
@@ -34,16 +31,7 @@
    "role": "Auditor"
   },
   {
-   "role": "\u062d\u0633\u0627\u0628\u0627\u062a \u0627\u0644\u0639\u0645\u0644\u0627\u0621"
-  },
-  {
    "role": "Bank Accountant"
-  },
-  {
-   "role": "Customer report only"
-  },
-  {
-   "role": "Sales User"
   },
   {
    "role": "System Manager"

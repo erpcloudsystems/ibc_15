@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "IBC",
- "modified": "2023-02-26 14:37:18.750034",
+ "modified": "2023-09-03 14:01:49.927789",
  "modified_by": "Administrator",
  "module": "Ibc",
  "name": "Total Summary Stock Cost",
@@ -28,9 +28,6 @@
   },
   {
    "role": "Stock User"
-  },
-  {
-   "role": "Sales User"
   },
   {
    "role": "Sales Manager"

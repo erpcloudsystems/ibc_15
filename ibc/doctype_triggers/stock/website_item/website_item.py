@@ -1,7 +1,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import json, ast, requests
+import json
+import ast
+import requests
 from requests_oauthlib import OAuth1
 
 
@@ -14,7 +16,7 @@ def before_insert(doc, method=None):
 def after_insert(doc, method=None):
     if not doc.website_image:
         frappe.throw(" Please Insert An Image For The Item ")
-    ## Get Single Values from Ecs Woocommerce seetings page
+    # Get Single Values from Ecs Woocommerce seetings page
     price_list = frappe.db.get_single_value("Ecs Woocommerce", "price_list")
     woocommerce_user_key = frappe.db.get_single_value(
         "Ecs Woocommerce", "woocommerce_user_key"
@@ -27,7 +29,7 @@ def after_insert(doc, method=None):
     )
     system_url = frappe.db.get_single_value("Ecs Woocommerce", "system_url")
 
-    ## Get Values From Website Item and Item
+    # Get Values From Website Item and Item
     sku = doc.item_code
     item1 = frappe.get_doc("Item", doc.item_code)
     if item1.website_ar:
@@ -41,13 +43,16 @@ def after_insert(doc, method=None):
     # permalink = "https://example.com/product" + doc.web_item_name
     image = system_url + doc.website_image
     price = frappe.db.get_value(
-        "Item Price", {"item_code": sku, "price_list": price_list}, ["price_list_rate"]
+        "Item Price", {"item_code": sku,
+                       "price_list": price_list}, ["price_list_rate"]
     )
-    category_id = frappe.db.get_value("Item Group", doc.item_group, "category_id")
+    category_id = frappe.db.get_value(
+        "Item Group", doc.item_group, "category_id")
     if not category_id:
-        frappe.throw(" Item Group " + doc.item_group + " Has No WooCommerce ID ")
+        frappe.throw(" Item Group " + doc.item_group +
+                     " Has No WooCommerce ID ")
 
-    ## Create Data Structure
+    # Create Data Structure
     data = {}
     data["name"] = item_name
     data["sku"] = sku
@@ -116,8 +121,9 @@ def validate(doc, method=None):
         if not doc.website_image:
             frappe.throw(" Please Insert An Image For The Item ")
 
-        ## Get Single Values from Ecs Woocommerce seetings page
-        price_list = frappe.db.get_single_value("Ecs Woocommerce", "price_list")
+        # Get Single Values from Ecs Woocommerce seetings page
+        price_list = frappe.db.get_single_value(
+            "Ecs Woocommerce", "price_list")
         woocommerce_user_key = frappe.db.get_single_value(
             "Ecs Woocommerce", "woocommerce_user_key"
         )
@@ -127,9 +133,10 @@ def validate(doc, method=None):
         woocommerce_create = frappe.db.get_single_value(
             "Ecs Woocommerce", "woocommerce_create"
         )
-        system_url = frappe.db.get_single_value("Ecs Woocommerce", "system_url")
+        system_url = frappe.db.get_single_value(
+            "Ecs Woocommerce", "system_url")
 
-        ## Get Values From Website Item and Item
+        # Get Values From Website Item and Item
         sku = doc.item_code
         item_name = doc.web_item_name
         # permalink = "https://example.com/product" + doc.web_item_name
@@ -139,16 +146,18 @@ def validate(doc, method=None):
             {"item_code": sku, "price_list": price_list},
             ["price_list_rate"],
         )
-        category_id = frappe.db.get_value("Item Group", doc.item_group, "category_id")
+        category_id = frappe.db.get_value(
+            "Item Group", doc.item_group, "category_id")
         if not category_id:
-            frappe.throw(" Item Group " + doc.item_group + " Has No WooCommerce ID ")
+            frappe.throw(" Item Group " + doc.item_group +
+                         " Has No WooCommerce ID ")
 
         if doc.published == 1:
             status = "publish"
         else:
             status = "draft"
 
-        ## Create Data Structure
+        # Create Data Structure
         data = {}
         data["name"] = item_name
         data["sku"] = sku
@@ -203,7 +212,8 @@ def validate(doc, method=None):
             auth=headeroauth,
             headers=headers,
         )
-        encode_data = json.dumps(response.json(), ensure_ascii=False).encode("utf8")
+        encode_data = json.dumps(
+            response.json(), ensure_ascii=False).encode("utf8")
         response = encode_data.decode()
         frappe.msgprint(response)
 
@@ -216,4 +226,3 @@ def before_save(doc, method=None):
 @frappe.whitelist()
 def on_update(doc, method=None):
     pass
-
