@@ -51,9 +51,10 @@ def after_insert(doc, method=None):
         auth=headeroauth,
         headers=headers,
     )
-    # frappe.msgprint(response.content)
+    frappe.msgprint(response.content)
 
     returned_data = json.loads(response.content)
+    
     doc.category_id = returned_data["id"]
     doc.save()
     doc.reload()
