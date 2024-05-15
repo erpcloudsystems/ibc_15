@@ -59,6 +59,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -122,6 +123,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -185,6 +187,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -248,6 +251,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": "50px"
@@ -311,6 +315,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -374,6 +379,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 1,
    "unique": 0,
    "width": null
@@ -437,6 +443,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -500,6 +507,7 @@
    "report_hide": 0,
    "reqd": 1,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -563,6 +571,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -626,6 +635,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -689,6 +699,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -752,6 +763,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -815,6 +827,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -878,6 +891,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -941,6 +955,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -1004,6 +1019,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 1,
    "unique": 0,
    "width": null
@@ -1067,6 +1083,7 @@
    "report_hide": 0,
    "reqd": 1,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 1,
    "unique": 0,
    "width": null
@@ -1130,6 +1147,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
+   "sort_options": 0,
    "translatable": 0,
    "unique": 0,
    "width": null
@@ -2738,6 +2756,58 @@
  "doctype": "Sales Order",
  "links": [],
  "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2024-04-15 12:41:46.179547",
+   "default_value": null,
+   "doc_type": "Sales Order",
+   "docstatus": 0,
+   "doctype_or_field": "DocField",
+   "field_name": "cost_center",
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2024-04-15 12:41:46.179547",
+   "modified_by": "a.sameh@erpcloud.systems",
+   "module": null,
+   "name": "Sales Order-cost_center-allow_on_submit",
+   "owner": "a.sameh@erpcloud.systems",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "allow_on_submit",
+   "property_type": "Check",
+   "row_name": null,
+   "value": "1"
+  },
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2024-04-15 12:41:36.312293",
+   "default_value": null,
+   "doc_type": "Sales Order",
+   "docstatus": 0,
+   "doctype_or_field": "DocField",
+   "field_name": "amount_eligible_for_commission",
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2024-04-15 12:41:36.312293",
+   "modified_by": "a.sameh@erpcloud.systems",
+   "module": null,
+   "name": "Sales Order-amount_eligible_for_commission-allow_on_submit",
+   "owner": "a.sameh@erpcloud.systems",
+   "parent": null,
+   "parentfield": null,
+   "parenttype": null,
+   "property": "allow_on_submit",
+   "property_type": "Check",
+   "row_name": null,
+   "value": "1"
+  },
   {
    "_assign": null,
    "_comments": null,

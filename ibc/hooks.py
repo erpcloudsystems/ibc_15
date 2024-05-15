@@ -835,6 +835,9 @@ web_include_css = "/assets/js/web_ecs.min.css"
 #
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
 
+fixtures = [
+"Property Setter"
+]
 
 # User Data Protection
 # --------------------
