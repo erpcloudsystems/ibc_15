@@ -8,22 +8,23 @@ def before_insert(doc, method=None):
     pass
 @frappe.whitelist()
 def after_insert(doc, method=None):
+    pass
     ### share sales order contain item with brand Honeywell * ###
-    flag = False
-    for row in doc.items:
-        if row.brand == "Honeywell *":
-            flag = True
-    if flag:
-        ## create docshare 
-        docshare = frappe.get_doc({
-            "doctype":"DocShare",
-            "user":"alaa@ibcegypt.com",
-            "read":1,
-            "share_name":doc.name,
-            "share_doctype":"Sales Order"
-            })
-        docshare.insert(ignore_permissions = True)
-        frappe.db.commit()
+    # flag = False
+    # for row in doc.items:
+    #     if row.brand == "Honeywell *":
+    #         flag = True
+    # if flag:
+    #     ## create docshare 
+    #     docshare = frappe.get_doc({
+    #         "doctype":"DocShare",
+    #         "user":"alaa@ibcegypt.com",
+    #         "read":1,
+    #         "share_name":doc.name,
+    #         "share_doctype":"Sales Order"
+    #         })
+    #     docshare.insert(ignore_permissions = True)
+    #     frappe.db.commit()
 @frappe.whitelist()
 def onload(doc, method=None):
     pass
