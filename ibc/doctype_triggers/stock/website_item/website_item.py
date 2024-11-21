@@ -205,6 +205,10 @@ def validate(doc, method=None):
         headers = {
             "content-type": "application/json;charset=utf-8",
             "Content-Length": "376",
+            "Connection": "keep-alive",
+            "Accept-Encoding":"gzip, deflate, br",
+            "Accept":"*/*",
+            "User-Agent":"PostmanRuntime/7.42.0"
         }
         response = requests.put(
             url=woocommerce_create + str(woocommerce_id),
