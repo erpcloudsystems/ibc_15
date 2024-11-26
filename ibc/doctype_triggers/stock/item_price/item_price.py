@@ -70,9 +70,14 @@ def validate(doc, method=None):
 
                     headeroauth = OAuth1(woocommerce_user_key, woocommerce_user_secret, None, None,
                                         signature_method='HMAC-SHA1')
-                    headers = {'content-type': 'application/json;charset=utf-8',
-                            "Content-Length": "376"
-                            }
+                    headers = {
+                        "content-type": "application/json;charset=utf-8",
+                        "Content-Length": "376",
+                        "Connection": "keep-alive",
+                        "Accept-Encoding":"gzip, deflate, br",
+                        "Accept":"*/*",
+                        "User-Agent":"PostmanRuntime/7.42.0"
+                    }
                     response = requests.post(
                         url=woocommerce_create + str(woocommerce_id),
                         data=json.dumps(data), auth=headeroauth, headers=headers)
