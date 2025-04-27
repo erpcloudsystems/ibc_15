@@ -12,6 +12,7 @@ def after_insert(doc, method=None):
 @frappe.whitelist()
 def onload(doc, method=None):
     pass
+    # validation_rate_fetch(doc)
 @frappe.whitelist()
 def before_validate(doc, method=None):
     pass
@@ -24,3 +25,25 @@ def before_save(doc, method=None):
 @frappe.whitelist()
 def on_update(doc, method=None):
     pass
+# @frappe.whitelist()
+# def validation_rate_fetch(doc):
+#     if doc.get('name'):
+#         if doc.get('item_defaults'):
+#             default_warehouse = doc.item_defaults[0].default_warehouse if doc.item_defaults else None
+
+#             # Proceed if a default warehouse is available and valuation_rate is not already set to 0
+#             if default_warehouse:
+#                 # Query the Bin table to get the valuation_rate where actual_qty is not zero
+#                 bin_data = frappe.get_all('Bin', filters={
+#                     'name': doc.item_code,
+#                     'warehouse': default_warehouse,
+#                     'actual_qty': ['!=', 0]
+#                 }, fields=['valuation_rate'], limit=1)
+
+#                 # If bin_data is found and valuation_rate is available, set it in the Item document
+#                 if bin_data:
+#                     bin_valuation_rate = bin_data[0].get('valuation_rate')
+#                     if bin_valuation_rate:
+#                         doc.valuation_rate = bin_valuation_rate
+#                         doc.save()  # Save the document after setting the valuation_rate
+#                         frappe.db.commit()  # Ensure changes are committed to the database
