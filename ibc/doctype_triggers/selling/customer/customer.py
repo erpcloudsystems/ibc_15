@@ -33,7 +33,7 @@ def before_validate(doc, method=None):
     pass
 @frappe.whitelist()
 def validate(doc, method=None):
-    if doc.mobile_no:
+    if doc.mobile_no and not doc.lead_name:
         existing_lead = frappe.db.exists(
             "Lead",
             {
