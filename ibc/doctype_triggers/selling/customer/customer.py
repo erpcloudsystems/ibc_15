@@ -33,17 +33,17 @@ def before_validate(doc, method=None):
     pass
 @frappe.whitelist()
 def validate(doc, method=None):
-    # if doc.mobile_no:
-    #     existing_customer = frappe.db.exists(
-    #         "Customer",
-    #         {
-    #             "mobile_no": doc.mobile_no,
-    #             "name": ["!=", doc.name]
-    #         }
-    #     )
-    #     if existing_customer:
-    #         frappe.throw(_("Mobile No already exists in another Customer: {0}").format(existing_customer))
-    pass
+    if doc.mobile_no:
+        existing_lead = frappe.db.exists(
+            "Lead",
+            {
+                "mobile_no": doc.mobile_no
+            }
+        )
+        frappe.msgprint(existing_lead)
+        if existing_lead:
+            frappe.throw(_("Mobile No already exists in Lead: {0}").format(existing_lead))
+    # pass
 @frappe.whitelist()
 def before_save(doc, method=None):
     pass
