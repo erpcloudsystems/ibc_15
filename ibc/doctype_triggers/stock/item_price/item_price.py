@@ -62,11 +62,11 @@ def validate(doc, method=None):
                     images.append({"src": image})
                     data["images"] = images
                     '''
-                    categories = []
-                    categories.append({"id": category_id})
-                    data["categories"] = categories
+                    # categories = []
+                    # categories.append({"id": category_id})
+                    # data["categories"] = categories
                     woocommerce_id = item.woocommerce_id
-                    # frappe.msgprint(json.dumps(data))
+                    frappe.msgprint(json.dumps(data))
 
                     headeroauth = OAuth1(woocommerce_user_key, woocommerce_user_secret, None, None,
                                         signature_method='HMAC-SHA1')
@@ -81,6 +81,10 @@ def validate(doc, method=None):
                     response = requests.post(
                         url=woocommerce_create + str(woocommerce_id),
                         data=json.dumps(data), auth=headeroauth, headers=headers)
+                    encode_data = json.dumps(
+                        response.json(), ensure_ascii=False).encode("utf8")
+                    response = encode_data.decode()
+                    frappe.msgprint(response)
 
 
 @frappe.whitelist()
