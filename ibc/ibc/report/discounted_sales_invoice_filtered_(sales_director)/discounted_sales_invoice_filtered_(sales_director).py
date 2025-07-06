@@ -140,7 +140,7 @@ def get_item_price_qty_data(filters):
 	item_results = frappe.db.sql(""" select
 										`tabSales Invoice`.name as sales_invoice,
 										`tabSales Invoice`.posting_date as posting_date,
-										`tabSales Invoice`.sales_person as sales_person,
+										`tabSales Team`.sales_person as sales_person,
 										`tabSales Invoice`.customer as customer,
 										`tabSales Invoice Item`.item_code as item_code,
 										`tabSales Invoice Item`.item_name as item_name,
@@ -151,16 +151,22 @@ def get_item_price_qty_data(filters):
 										`tabSales Invoice Item`.item_group as item_group,
 										`tabSales Invoice Item`.brand as brand,
 										`tabSales Invoice`.status as status,
-										`tabSales Invoice Item`.net_amount as net_amount,
-										`tabSales Invoice Item`.amount as amount,
+										CASE 
+											WHEN `tabSales Team`.sales_person = 'Demo' THEN 0
+											ELSE `tabSales Invoice Item`.net_amount
+										END AS net_amount,
+										CASE 
+											WHEN `tabSales Team`.sales_person = 'Demo' THEN 0
+											ELSE `tabSales Invoice Item`.amount
+										END AS amount,
 										`tabSales Invoice`.is_return as is_return
 									from
 										`tabSales Invoice`
+							  			join `tabSales Team` on  `tabSales Invoice`.name = `tabSales Team`.parent
 										join `tabSales Invoice Item` on `tabSales Invoice`.name = `tabSales Invoice Item`.parent
 										join `tabSales Person` on `tabSales Person`.name = `tabSales Invoice`.sales_person
 									where
 										`tabSales Invoice`.docstatus = 1
-									and `tabSales Person`.parent_sales_person in ('Sales Director','6th October','Alexandria','Head Office','Demo','Hurgada','Down Town')
 									and {conditions}
 								"""
 		.format(conditions=conditions), filters, as_dict=1)
