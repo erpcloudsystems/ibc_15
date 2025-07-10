@@ -132,7 +132,7 @@ def get_item_price_qty_data(filters):
     if filters.get("brand"):
         conditions.append("`tabSales Invoice Item`.brand=%(brand)s")
     if filters.get("sales_person"):
-        conditions.append("`tabSales Team`.sales_person = %(sales_person)s")
+        conditions.append("`tabSales Invoice`.sales_person = %(sales_person)s")
     if filters.get("show_only_maintain_stock"):
         conditions.append("`tabSales Invoice Item`.is_stock_item = 1")
 
@@ -141,7 +141,7 @@ def get_item_price_qty_data(filters):
     item_results = frappe.db.sql(""" select
                                         `tabSales Invoice`.name as sales_invoice,
                                         `tabSales Invoice`.posting_date as posting_date,
-                                        `tabSales Team`.sales_person as sales_person,
+                                        `tabSales Invoice`.sales_person as sales_person,
                                         `tabSales Invoice`.customer as customer,
                                         `tabSales Invoice Item`.item_code as item_code,
                                         `tabSales Invoice Item`.item_name as item_name,
@@ -157,14 +157,15 @@ def get_item_price_qty_data(filters):
                                         `tabSales Invoice`.is_return as is_return
                                     from
                                         `tabSales Invoice`
-                                        join `tabSales Team` on `tabSales Invoice`.name = `tabSales Team`.parent
                                         join `tabSales Invoice Item` on `tabSales Invoice`.name = `tabSales Invoice Item`.parent
                                         join `tabSales Person` on `tabSales Person`.name = `tabSales Invoice`.sales_person
                                     where
                                         `tabSales Invoice`.docstatus = 1
+                                    and `tabSales Person`.parent_sales_person in ('Sales Director','6th October','Alexandria','Head Office','Demo','Hurgada','Down Town')
                                     and {conditions}
                                 """
         .format(conditions=conditions), filters, as_dict=1)
+
 
     result = []
     if item_results:
