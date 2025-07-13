@@ -88,8 +88,12 @@ def validate(doc, method=None):
         signature_method="HMAC-SHA1"
     )
     headers = {
-        "content-type": "application/json"
-    }
+        "content-type": "application/json;charset=utf-8",
+        "Content-Length": "376",
+        "Connection": "keep-alive",
+        "Accept-Encoding":"gzip, deflate, br",
+        "Accept":"*/*",
+        "User-Agent":"PostmanRuntime/7.42.0"    }
 
     # Data to send
     data = {"name": doc.name}
