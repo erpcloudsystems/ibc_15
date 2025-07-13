@@ -71,28 +71,34 @@ def before_validate(doc, method=None):
     pass
 
 
+import frappe
+import requests
+from requests_oauthlib import OAuth1
+import json
+import urllib.parse
+
 @frappe.whitelist()
 def validate(doc, method=None):
-    # Get Woocommerce settings
+    # Get WooCommerce settings
     woocommerce_user_key = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_key")
     woocommerce_user_secret = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_secret")
-    woocommerce_api_base = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_create_category")  # base URL, e.g., https://yourstore.com/wp-json/wc/v3/products/categories/
+    woocommerce_api_base = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_create_category")
 
-    # Prepare auth and headers
+    # Ensure the base URL is correct (no trailing slash)
+    if woocommerce_api_base.endswith("/"):
+        woocommerce_api_base = woocommerce_api_base.rstrip("/")
+
+    # Prepare auth
     auth = OAuth1(
-        woocommerce_user_key,
-        woocommerce_user_secret,
-        None,
-        None,
+        client_key=woocommerce_user_key,
+        client_secret=woocommerce_user_secret,
         signature_method="HMAC-SHA1",
     )
+
+    # Simplified headers
     headers = {
-        "content-type": "application/json;charset=utf-8",
-        "Content-Length": "376",
-        "Connection": "keep-alive",
-        "Accept-Encoding":"gzip, deflate, br",
-        "Accept":"*/*",
-        "User-Agent":"PostmanRuntime/7.42.0"
+        "Content-Type": "application/json",
+        "Accept": "application/json",
     }
 
     # Build the category data payload
@@ -105,47 +111,58 @@ def validate(doc, method=None):
 
     # Step 1: If no category_id, check if the category exists on WooCommerce
     if not doc.category_id:
-        # Search existing categories by name
-        search_url = f"{woocommerce_api_base}?search={doc.name}"
-        response = requests.get(search_url, auth=auth, headers=headers)
+        # URL-encode the search term
+        encoded_name = urllib.parse.quote(doc.name)
+        search_url = f"{woocommerce_api_base}?search={encoded_name}"
+        
+        # Log the request for debugging
+        frappe.log_error(f"Sending GET request to: {search_url}", "WooCommerce Category Search")
 
-        if response.status_code == 200:
+        try:
+            response = requests.get(search_url, auth=auth, headers=headers)
+            response.raise_for_status()  # Raise an exception for 4xx/5xx errors
             existing_categories = response.json()
+
             if existing_categories:
                 # Category found → use its ID
                 existing_category_id = existing_categories[0]["id"]
                 doc.category_id = existing_category_id
                 # doc.save()
-                # return
+                frappe.msgprint(f"Category found: {doc.name} (ID: {existing_category_id})")
             else:
                 # Step 2: If not found → create a new category
+                frappe.log_error(f"Creating new category: {json.dumps(data)}", "WooCommerce Category Creation")
                 create_response = requests.post(
                     url=woocommerce_api_base,
                     data=json.dumps(data),
                     auth=auth,
                     headers=headers,
                 )
-                if create_response.status_code in [200, 201]:
-                    returned_data = create_response.json()
-                    doc.category_id = returned_data.get("id")
-                    # doc.save()
-                    # return
-                else:
-                    frappe.throw(f"Failed to create category: {create_response.text}")
-        else:
-            frappe.throw(f"Failed to search for category: {response.text}")
-    
+                create_response.raise_for_status()  # Raise an exception for 4xx/5xx errors
+                returned_data = create_response.json()
+                doc.category_id = returned_data.get("id")
+                # doc.save()
+                frappe.msgprint(f"Category created: {doc.name} (ID: {doc.category_id})")
+                
+        except requests.exceptions.RequestException as e:
+            frappe.log_error(f"API request failed: {str(e)}\nResponse: {response.text}", "WooCommerce API Error")
+            frappe.throw(f"Failed to process category: {str(e)}")
     else:
-        # If category_id already exists, optionally update the category (if needed)
-        update_url = woocommerce_api_base + str(doc.category_id)
-        update_response = requests.post(
-            url=update_url,
-            data=json.dumps(data),
-            auth=auth,
-            headers=headers,
-        )
-        frappe.msgprint(f"Category {doc.category_id} updated: {update_response.content}")
-
+        # If category_id exists, update the category
+        update_url = f"{woocommerce_api_base}/{doc.category_id}"
+        frappe.log_error(f"Updating category: {update_url} with data: {json.dumps(data)}", "WooCommerce Category Update")
+        try:
+            update_response = requests.put(  # Use PUT for updates instead of POST
+                url=update_url,
+                data=json.dumps(data),
+                auth=auth,
+                headers=headers,
+            )
+            update_response.raise_for_status()
+            frappe.msgprint(f"Category {doc.category_id} updated successfully")
+        except requests.exceptions.RequestException as e:
+            frappe.log_error(f"Update failed: {str(e)}\nResponse: {update_response.text}", "WooCommerce API Error")
+            frappe.throw(f"Failed to update category: {str(e)}")
 
 @frappe.whitelist()
 def before_save(doc, method=None):
