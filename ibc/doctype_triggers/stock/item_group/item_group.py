@@ -115,8 +115,8 @@ def validate(doc, method=None):
                 # Category found → use its ID
                 existing_category_id = existing_categories[0]["id"]
                 doc.category_id = existing_category_id
-                doc.save()
-                return
+                # doc.save()
+                # return
             else:
                 # Step 2: If not found → create a new category
                 create_response = requests.post(
@@ -128,8 +128,8 @@ def validate(doc, method=None):
                 if create_response.status_code in [200, 201]:
                     returned_data = create_response.json()
                     doc.category_id = returned_data.get("id")
-                    doc.save()
-                    return
+                    # doc.save()
+                    # return
                 else:
                     frappe.throw(f"Failed to create category: {create_response.text}")
         else:
