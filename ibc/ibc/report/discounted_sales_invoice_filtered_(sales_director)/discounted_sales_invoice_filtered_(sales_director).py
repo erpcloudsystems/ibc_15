@@ -117,8 +117,8 @@ def get_columns():
 
 def get_data(filters, columns):
     item_price_qty_data = get_item_price_qty_data(filters)
-    totals = calculate_totals(item_price_qty_data)
-    item_price_qty_data.append(totals)
+    # totals = calculate_totals(item_price_qty_data)
+    # item_price_qty_data.append(totals)
     return item_price_qty_data
 
 def get_item_price_qty_data(filters):
