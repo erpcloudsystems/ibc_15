@@ -73,84 +73,57 @@ def before_validate(doc, method=None):
 
 @frappe.whitelist()
 def validate(doc, method=None):
-    if doc.category_id:
-        ## Get Single Values from Ecs Woocommerce seetings page
-        woocommerce_user_key = frappe.db.get_single_value(
-            "Ecs Woocommerce", "woocommerce_user_key"
-        )
-        woocommerce_user_secret = frappe.db.get_single_value(
-            "Ecs Woocommerce", "woocommerce_user_secret"
-        )
-        woocommerce_create_category = frappe.db.get_single_value(
-            "Ecs Woocommerce", "woocommerce_create_category"
-        )
-        category_id = doc.category_id
-        new_name = doc.name
-        ## Create Data Structure
-        data = {}
-        data["name"] = new_name
-        if doc.parent_item_group:
-            parent_category = frappe.db.get_value(
-                "Item Group", {"name": doc.parent_item_group}, "category_id"
-            )
-            data["parent"] = parent_category
-        # frappe.msgprint(json.dumps(data))
+    # Fetch required settings only once
+    woocommerce_user_key = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_key")
+    woocommerce_user_secret = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_secret")
+    woocommerce_create_category = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_create_category")
 
-        headeroauth = OAuth1(
-            woocommerce_user_key,
-            woocommerce_user_secret,
-            None,
-            None,
-            signature_method="HMAC-SHA1",
-        )
-        headers = {
-            "content-type": "application/json;charset=utf-8",
-            "Content-Length": "376",
-        }
-        response = requests.post(
-            url=woocommerce_create_category + str(category_id),
-            data=json.dumps(data),
-            auth=headeroauth,
-            headers=headers,
-        )
-        # frappe.msgprint(response.content)
-    else:
-        data = {}
-        data["name"] = doc.name
-        if doc.parent_item_group:
-            parent_category = frappe.db.get_value(
-                "Item Group", {"name": doc.parent_item_group}, "category_id"
-            )
+    # Prepare category creation data
+    data = {"name": doc.name}
+
+    if doc.parent_item_group:
+        parent_category = frappe.db.get_value("Item Group", {"name": doc.parent_item_group}, "category_id")
+        if parent_category:
             data["parent"] = parent_category
 
-        # frappe.msgprint(json.dumps(data))
+    # Set up OAuth1 and headers
+    headeroauth = OAuth1(
+        woocommerce_user_key,
+        woocommerce_user_secret,
+        None,
+        None,
+        signature_method="HMAC-SHA1",
+    )
+    headers = {
+        "content-type": "application/json;charset=utf-8"
+    }
 
-        headeroauth = OAuth1(
-            woocommerce_user_key,
-            woocommerce_user_secret,
-            None,
-            None,
-            signature_method="HMAC-SHA1",
-        )
-        headers = {
-            "content-type": "application/json;charset=utf-8",
-            "Content-Length": "376",
-        }
+    # If category_id is missing, create a new one
+    if not doc.category_id:
         response = requests.post(
             url=woocommerce_create_category,
             data=json.dumps(data),
             auth=headeroauth,
             headers=headers,
         )
-        # frappe.msgprint(response.content)
-        frappe.msgprint(response.content)
+        frappe.msgprint(f"Response from WooCommerce: {response.content}")
 
-        returned_data = json.loads(response.content)
-        
-        doc.category_id = returned_data["id"]
-        doc.save()
-        doc.reload()
-
+        if response.status_code == 201:
+            returned_data = response.json()
+            doc.category_id = returned_data.get("id")
+            doc.save()
+            doc.reload()
+        else:
+            frappe.throw(f"Failed to create category: {response.text}")
+    else:
+        # Optional: update existing category (if needed)
+        response = requests.post(
+            url=woocommerce_create_category + str(doc.category_id),
+            data=json.dumps(data),
+            auth=headeroauth,
+            headers=headers,
+        )
+        frappe.msgprint(f"Updated category {doc.category_id}: {response.content}")
 
 
 @frappe.whitelist()
