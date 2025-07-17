@@ -226,7 +226,7 @@ def validate(doc, method=None):
         frappe.msgprint(response)
         if getattr(doc, "item_name_ar", None) or getattr(doc, "discription_ar", None):
             # normalize the base URL (no trailing slash)
-            custom_api_url = "https://vti.erf.mybluehost.me/send/api/update-product.php"
+            custom_api_url = "https://vti.erf.mybluehost.me/website_af84c5e9/send/api/update-product.php"
 
 
             payload = {
