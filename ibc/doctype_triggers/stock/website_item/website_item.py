@@ -225,23 +225,29 @@ def validate(doc, method=None):
         response = encode_data.decode()
         frappe.msgprint(response)
         if getattr(doc, "item_name_ar", None) or getattr(doc, "discription_ar", None):
-            custom_api_url = (
-                f"{system_url}/send/api/update-product.php"
-            )
+            # normalize the base URL (no trailing slash)
+            base = system_url.rstrip("/")
+            custom_api_url = f"{base}/send/api/update-product.php"
 
             payload = {
-                "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ", 
+                "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
                 "id": sku,
                 "name": doc.item_name_ar or "",
                 "desc": doc.discription_ar or "",
             }
 
             try:
-                api_response = requests.get(custom_api_url, params=payload, timeout=10)
-                frappe.msgprint(f"Arabic API Response: {api_response.text}")
-                frappe.msgprint(f"Params: {payload}")
+                # send as form-encoded POST
+                api_response = requests.post(
+                    custom_api_url,
+                    data=payload,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                    timeout=10
+                )
+                frappe.msgprint(f"Arabic API response (status {api_response.status_code}):\n{api_response.text}")
+                frappe.msgprint(f"Payload sent: {payload}")
 
-            except Exception as e:
+            except Exception:
                 frappe.log_error(frappe.get_traceback(), "Arabic Product Update API Error")
                 frappe.msgprint("Failed to send Arabic fields to external API.")
 
