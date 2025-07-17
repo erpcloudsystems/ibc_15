@@ -225,7 +225,7 @@ def validate(doc, method=None):
         response = encode_data.decode()
         frappe.msgprint(response)
         if doc.item_name_ar or doc.discription_ar:
-            token = ""  # Add your token here if needed
+            token = "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ"
             arabic_api_url = f"{system_url}/send/api/update-product.php?token={token}&id={sku}"
 
             if doc.item_name_ar:
