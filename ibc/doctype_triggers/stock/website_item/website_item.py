@@ -241,7 +241,14 @@ def validate(doc, method=None):
                 api_response = requests.post(
                     custom_api_url,
                     data=payload,
-                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                    headers={            
+            "content-type": "application/json;charset=utf-8",
+            "Content-Length": "376",
+            "Connection": "keep-alive",
+            "Accept-Encoding":"gzip, deflate, br",
+            "Accept":"*/*",
+            "User-Agent":"PostmanRuntime/7.42.0"
+            },
                     timeout=10
                 )
                 frappe.msgprint(f"Arabic API response (status {api_response.status_code}):\n{api_response.text}")
