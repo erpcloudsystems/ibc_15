@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from webshop.webshop.doctype.website_item.website_item import make_website_item
 
 
 @frappe.whitelist()
@@ -47,3 +48,18 @@ def on_update(doc, method=None):
 #                         doc.valuation_rate = bin_valuation_rate
 #                         doc.save()  # Save the document after setting the valuation_rate
 #                         frappe.db.commit()  # Ensure changes are committed to the database
+
+
+@frappe.whitelist()
+def bulk_publish_website_items(items):
+    import json
+    if isinstance(items, str):
+        items = json.loads(items)
+
+    published = []
+    for item_name in items:
+        doc = frappe.get_doc("Item", item_name)
+        if not doc.published_in_website:
+            website_item_name = make_website_item(doc)
+            published.append([website_item_name, doc.item_name or item_name])
+    return published
