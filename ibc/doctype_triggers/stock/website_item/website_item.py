@@ -239,6 +239,8 @@ def validate(doc, method=None):
             try:
                 api_response = requests.get(custom_api_url, params=payload, timeout=10)
                 frappe.msgprint(f"Arabic API Response: {api_response.text}")
+                frappe.msgprint(f"Params: {payload}")
+
             except Exception as e:
                 frappe.log_error(frappe.get_traceback(), "Arabic Product Update API Error")
                 frappe.msgprint("Failed to send Arabic fields to external API.")
