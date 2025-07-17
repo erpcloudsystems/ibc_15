@@ -224,21 +224,26 @@ def validate(doc, method=None):
             response.json(), ensure_ascii=False).encode("utf8")
         response = encode_data.decode()
         frappe.msgprint(response)
-        if doc.item_name_ar or doc.discription_ar:
-            token = "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ"
-            arabic_api_url = f"{system_url}/send/api/update-product.php?token={token}&id={sku}"
+        if getattr(doc, "item_name_ar", None) or getattr(doc, "discription_ar", None):
+            custom_api_url = (
+                f"{system_url}/send/api/update-product.php"
+            )
 
-            if doc.item_name_ar:
-                arabic_api_url += f"&name={frappe.utils.encode(doc.item_name_ar)}"
-            if doc.discription_ar:
-                arabic_api_url += f"&desc={frappe.utils.encode(doc.discription_ar)}"
+            payload = {
+                "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ", 
+                "id": sku,
+                "name": doc.item_name_ar or "",
+                "desc": doc.discription_ar or "",
+            }
 
             try:
-                arabic_response = requests.get(arabic_api_url)
-                frappe.msgprint(f"Arabic API Response: {arabic_response.text}")
+                api_response = requests.get(custom_api_url, params=payload, timeout=10)
+                frappe.msgprint(f"Arabic API Response: {api_response.text}")
+                frappe.msgprint(f"Params: {payload}")
+
             except Exception as e:
-                frappe.log_error(f"Arabic API Error: {str(e)}", "Arabic API Call Failed")
-                frappe.msgprint("Failed to update Arabic product info.")
+                frappe.log_error(frappe.get_traceback(), "Arabic Product Update API Error")
+                frappe.msgprint("Failed to send Arabic fields to external API.")
 
 @frappe.whitelist()
 def before_save(doc, method=None):
