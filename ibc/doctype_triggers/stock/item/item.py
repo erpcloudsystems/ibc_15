@@ -2,7 +2,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from webshop.webshop.doctype.website_item.website_item import make_website_item
-
+import json
+import ast
+import requests
 
 @frappe.whitelist()
 def before_insert(doc, method=None):
