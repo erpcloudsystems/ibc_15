@@ -264,7 +264,8 @@ def validate(doc, method=None):
                 "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",  # exact token
                 "id": doc.woocommerce_id,
                 "name": doc.item_name_ar or "",
-                "desc": doc.discription_ar or ""
+                "desc": doc.discription_ar or "",
+                "short_desc": doc.discription_ar or ""
             }
 
             try:
