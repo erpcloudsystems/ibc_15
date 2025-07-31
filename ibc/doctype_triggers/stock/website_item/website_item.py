@@ -204,7 +204,7 @@ def validate(doc, method=None):
             "status": status,
             "regular_price": str(price or 0),
             "description": doc.web_long_description or "",
-            "short_description": doc.web_long_description or "",
+            "short_description": doc.short_description or "",
             "images": [{"src": image}]
         }
 
