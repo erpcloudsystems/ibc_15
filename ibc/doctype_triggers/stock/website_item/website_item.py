@@ -162,12 +162,12 @@ import frappe
 
 @frappe.whitelist()
 def validate(doc, method=None):
-    item1 = frappe.get_doc("Item", doc.item_code)
-    if item1.item_name_ar:
-        doc.item_name_ar = item1.item_name_ar
-    if item1.discription_ar:
-        doc.discription_ar = item1.discription_ar
-        frappe.msgprint(str(doc.discription_ar))
+    # item1 = frappe.get_doc("Item", doc.item_code)
+    # if item1.item_name_ar:
+    #     doc.item_name_ar = item1.item_name_ar
+    # if item1.discription_ar:
+    #     doc.discription_ar = item1.discription_ar
+    #     frappe.msgprint(str(doc.discription_ar))
     if doc.woocommerce_id:
         if not doc.website_image:
             frappe.throw("Please Insert An Image For The Item")
@@ -198,7 +198,7 @@ def validate(doc, method=None):
 
         # Create Data Structure for WooCommerce API
         data = {
-            "name": doc.item_name_ar or item_name,
+            "name": item_name,
             "sku": sku,
             "type": "simple",
             "status": status,
