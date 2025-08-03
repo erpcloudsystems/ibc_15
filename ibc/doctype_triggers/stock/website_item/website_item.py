@@ -105,8 +105,16 @@ def after_insert(doc, method=None):
     response = requests.post(
         url=woocommerce_create, data=json.dumps(data), auth=headeroauth, headers=headers
     )
-    frappe.msgprint(response.content)
-    returned_data = json.loads(response.content)
+
+    response_text = response.content.decode("utf-8", errors="ignore").strip()
+
+    if not response_text:
+        frappe.throw("❌ WooCommerce API returned an empty response. Check your WooCommerce server or credentials.")
+
+    try:
+        returned_data = json.loads(response_text)
+    except json.JSONDecodeError:
+        frappe.throw(f"❌ WooCommerce API response is not valid JSON:\n{response_text}")
     doc.woocommerce_id = returned_data["id"]
         # Arabic API Request
     if doc.item_name_ar or doc.discription_ar:
