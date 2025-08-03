@@ -60,7 +60,7 @@ def after_insert(doc, method=None):
     data["type"] = "simple"
     data["regular_price"] = str(price)
     data["description"] = doc.web_long_description
-    # data["descs ar"] = doc.web_long_description
+    data["descs ar"] = doc.web_long_description
     data["short_description"] = doc.web_long_description
     data["image"] = image
 
@@ -103,63 +103,44 @@ def after_insert(doc, method=None):
         "User-Agent":"PostmanRuntime/7.42.0"
     }
     response = requests.post(
-        url=woocommerce_create,
-        data=json.dumps(data),
-        auth=headeroauth,
-        headers=headers
+        url=woocommerce_create, data=json.dumps(data), auth=headeroauth, headers=headers
     )
-
-    response_text = response.content.decode("utf-8", errors="ignore").strip()
-
-    frappe.msgprint(f"🔍 Raw WooCommerce Response:\n{response_text}")  # Show actual content
-
-    if not response_text:
-        frappe.throw("❌ WooCommerce API returned an empty response.")
-
-    try:
-        returned_data = json.loads(response_text)
-    except json.JSONDecodeError:
-        frappe.throw(f"❌ WooCommerce API response is not valid JSON:\n{response_text}")
+    frappe.msgprint(response.content)
+    returned_data = json.loads(response.content)
     doc.woocommerce_id = returned_data["id"]
-        # Arabic API Request
     if doc.item_name_ar or doc.discription_ar:
-        custom_api_url = "https://vti.erf.mybluehost.me/website_af84c5e9/api/update-product.php"
+        # normalize the base URL (no trailing slash)
+        custom_api_url = "https://vti.erf.mybluehost.me/website_af84c5e9/send/api/update-product.php"
 
-        params = {
+
+        payload = {
             "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
-            "id": doc.woocommerce_id,
+            "id": sku,
             "name": doc.item_name_ar or "",
             "desc": doc.discription_ar or "",
-            "short_desc": doc.discription_ar or ""
         }
 
         try:
-            response = requests.post(
-                url=custom_api_url,
-                params=params,  # query string params
-                data="",        # empty POST body
-                headers={
-                    "Content-Type": "application/x-www-form-urlencoded",
+            headers={           
+                    "Content-Type": "application/json",
                     "Connection": "keep-alive",
-                    "Accept": "*/*",
-                    "User-Agent": "PostmanRuntime/7.42.0",
-                    "Accept-Encoding": "gzip, deflate, br"
+                    "Accept":"*/*",
+                    "User-Agent":"PostmanRuntime/7.42.0",
+                    "Accept-Encoding":"gzip, deflate, br"
                 }
+            # send as form-encoded POST
+            api_response = requests.post(
+                custom_api_url,
+                data=json.dumps(payload),
+                headers=headers
             )
 
-            response_text = response.content.decode("utf-8", errors="ignore").strip()
+            frappe.msgprint(f"Arabic API response (status {api_response.status_code}):\n{api_response}")
+            frappe.msgprint(f"Payload sent: {payload}")
 
-            if response.status_code != 200:
-                frappe.msgprint("❌ Arabic product update failed.")
-                frappe.msgprint(f"Status: {response.status_code}")
-                frappe.msgprint(f"Response:\n{response_text}")
-            else:
-                frappe.msgprint("✅ Arabic product updated successfully.")
-                frappe.msgprint(response_text)
-
-        except Exception as e:
+        except Exception:
             frappe.log_error(frappe.get_traceback(), "Arabic Product Update API Error")
-            frappe.msgprint("❌ Failed to send Arabic fields to external API.")
+            frappe.msgprint("Failed to send Arabic fields to external API.")
 
     doc.save()
 
