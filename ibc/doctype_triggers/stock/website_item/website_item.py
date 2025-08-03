@@ -103,13 +103,18 @@ def after_insert(doc, method=None):
         "User-Agent":"PostmanRuntime/7.42.0"
     }
     response = requests.post(
-        url=woocommerce_create, data=json.dumps(data), auth=headeroauth, headers=headers
+        url=woocommerce_create,
+        data=json.dumps(data),
+        auth=headeroauth,
+        headers=headers
     )
 
     response_text = response.content.decode("utf-8", errors="ignore").strip()
 
+    frappe.msgprint(f"🔍 Raw WooCommerce Response:\n{response_text}")  # Show actual content
+
     if not response_text:
-        frappe.throw("❌ WooCommerce API returned an empty response. Check your WooCommerce server or credentials.")
+        frappe.throw("❌ WooCommerce API returned an empty response.")
 
     try:
         returned_data = json.loads(response_text)
