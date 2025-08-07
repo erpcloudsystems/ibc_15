@@ -44,6 +44,10 @@ def after_insert(doc, method=None):
     headers = {
         "content-type": "application/json;charset=utf-8",
         "Content-Length": "376",
+        "Connection": "keep-alive",
+        "Accept-Encoding":"gzip, deflate, br",
+        "Accept":"*/*",
+        "User-Agent":"PostmanRuntime/7.42.0"    
     }
     response = requests.post(
         url=woocommerce_create_category,
@@ -93,7 +97,8 @@ def validate(doc, method=None):
         "Connection": "keep-alive",
         "Accept-Encoding":"gzip, deflate, br",
         "Accept":"*/*",
-        "User-Agent":"PostmanRuntime/7.42.0"    }
+        "User-Agent":"PostmanRuntime/7.42.0"    
+        }
 
     # Data to send
     data = {"name": doc.name}
