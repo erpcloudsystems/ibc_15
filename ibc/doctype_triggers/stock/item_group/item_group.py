@@ -187,10 +187,16 @@ def after_rename(first, name, before_rename, after_rename, bool_arg):
     headers = {
         "content-type": "application/json;charset=utf-8",
         "Content-Length": "376",
+        "Connection": "keep-alive",
+        "Accept-Encoding":"gzip, deflate, br",
+        "Accept":"*/*",
+        "User-Agent":"PostmanRuntime/7.42.0"    
     }
+
     response = requests.post(
         url=woocommerce_create_category + str(category_id),
         data=json.dumps(data),
         auth=headeroauth,
         headers=headers,
     )
+    frappe.msgprint(f"Category updated: {response}")
