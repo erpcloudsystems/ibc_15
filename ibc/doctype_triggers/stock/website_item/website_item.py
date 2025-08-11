@@ -224,7 +224,7 @@ def validate(doc, method=None):
                 )
                 if category_ids:
                     categories.append({"id": category_ids})
-        data["categories"] = categories
+        # data["categories"] = categories
 
         # WooCommerce API Request
         woocommerce_id = doc.woocommerce_id
