@@ -36,8 +36,8 @@ def after_insert(doc, method=None):
         doc.item_name_ar = item1.item_name_ar
     if item1.discription_ar:
         doc.discription_ar = item1.discription_ar
-    doc.web_long_description = item1.description
-    doc.short_description = item1.description
+    doc.custom_website_description_en = item1.description
+    doc.custom_short_website_description_en = item1.description
 
     doc.save()
     item_name = doc.web_item_name
@@ -59,9 +59,9 @@ def after_insert(doc, method=None):
     data["sku"] = sku
     data["type"] = "simple"
     data["regular_price"] = str(price)
-    data["description"] = doc.web_long_description
-    data["descs ar"] = doc.web_long_description
-    data["short_description"] = doc.web_long_description
+    data["description"] = doc.custom_website_description_en
+    data["descs ar"] = doc.discription_ar
+    data["short_description"] = doc.custom_short_website_description_en
     data["image"] = image
 
     images = []
@@ -203,8 +203,8 @@ def validate(doc, method=None):
             "type": "simple",
             "status": status,
             "regular_price": str(price or 0),
-            "description": doc.web_long_description or "",
-            "short_description": doc.short_description or "",
+            "description": doc.custom_website_description_en or "",
+            "short_description": doc.custom_short_website_description_en or "",
             "images": [{"src": image}]
         }
 
