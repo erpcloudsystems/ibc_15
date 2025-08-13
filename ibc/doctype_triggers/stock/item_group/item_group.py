@@ -12,7 +12,10 @@ def before_insert(doc, method=None):
 
 @frappe.whitelist()
 def after_insert(doc, method=None):
-    ## Get Single Values from Ecs Woocommerce seetings page
+    import requests, json
+    from requests_oauthlib import OAuth1
+
+    ## Get Single Values from Ecs Woocommerce settings page
     woocommerce_user_key = frappe.db.get_single_value(
         "Ecs Woocommerce", "woocommerce_user_key"
     )
@@ -23,17 +26,6 @@ def after_insert(doc, method=None):
         "Ecs Woocommerce", "woocommerce_create_category"
     )
 
-    ## Create Data Structure
-    data = {}
-    data["name"] = doc.name
-    if doc.parent_item_group:
-        parent_category = frappe.db.get_value(
-            "Item Group", {"name": doc.parent_item_group}, "category_id"
-        )
-        data["parent"] = parent_category
-
-    # frappe.msgprint(json.dumps(data))
-
     headeroauth = OAuth1(
         woocommerce_user_key,
         woocommerce_user_secret,
@@ -41,26 +33,39 @@ def after_insert(doc, method=None):
         None,
         signature_method="HMAC-SHA1",
     )
-    headers = {
-        "content-type": "application/json;charset=utf-8",
-        "Content-Length": "376",
-        "Connection": "keep-alive",
-        "Accept-Encoding":"gzip, deflate, br",
-        "Accept":"*/*",
-        "User-Agent":"PostmanRuntime/7.42.0"    
-    }
-    response = requests.post(
-        url=woocommerce_create_category,
-        data=json.dumps(data),
-        auth=headeroauth,
-        headers=headers,
-    )
-    # frappe.msgprint(response.content)
-    frappe.msgprint(response.content)
 
-    returned_data = json.loads(response.content)
-    
-    doc.category_id = returned_data["id"]
+    ## Step 1: Check if category already exists
+    check_url = woocommerce_create_category + f"?search={doc.name}"
+    response_check = requests.get(check_url, auth=headeroauth)
+    categories = json.loads(response_check.content)
+
+    if categories:
+        # Category exists, get its ID
+        category_id = categories[0]["id"]
+    else:
+        # Step 2: Create category if not exists
+        data = {"name": doc.name}
+        if doc.parent_item_group:
+            parent_category = frappe.db.get_value(
+                "Item Group", {"name": doc.parent_item_group}, "category_id"
+            )
+            data["parent"] = parent_category
+
+        headers = {
+            "content-type": "application/json;charset=utf-8",
+            "Accept": "*/*",
+        }
+        response_create = requests.post(
+            url=woocommerce_create_category,
+            data=json.dumps(data),
+            auth=headeroauth,
+            headers=headers,
+        )
+        returned_data = json.loads(response_create.content)
+        category_id = returned_data["id"]
+
+    ## Step 3: Save category ID to doc
+    doc.category_id = category_id
     doc.save()
     doc.reload()
 
