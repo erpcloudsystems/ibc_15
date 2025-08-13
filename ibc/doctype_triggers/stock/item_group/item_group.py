@@ -52,8 +52,12 @@ def after_insert(doc, method=None):
             data["parent"] = parent_category
 
         headers = {
-            "content-type": "application/json;charset=utf-8",
-            "Accept": "*/*",
+        "content-type": "application/json;charset=utf-8",
+        "Content-Length": "376",
+        "Connection": "keep-alive",
+        "Accept-Encoding":"gzip, deflate, br",
+        "Accept":"*/*",
+        "User-Agent":"PostmanRuntime/7.42.0"    
         }
         response_create = requests.post(
             url=woocommerce_create_category,
