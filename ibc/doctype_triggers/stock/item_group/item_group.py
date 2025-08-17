@@ -110,6 +110,9 @@ def validate(doc, method=None):
     woocommerce_user_key = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_key")
     woocommerce_user_secret = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_secret")
     woocommerce_api_base = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_create_category").rstrip("/")
+    woocommerce_create_category = frappe.db.get_single_value(
+        "Ecs Woocommerce", "woocommerce_create_category"
+    )
 
     # Auth and headers
     auth = OAuth1(
@@ -155,7 +158,70 @@ def validate(doc, method=None):
                 else:
                     frappe.throw(f"Failed to create category: {create_response.text}")
         else:
-            frappe.throw(f"Failed to search for category: {response.text}")
+            # data = {
+            #     "name": doc.name
+            # }
+
+            if doc.parent_item_group:
+                parent_category = frappe.db.get_value(
+                    "Item Group", {"name": doc.parent_item_group}, "category_id"
+                )
+                if parent_category:
+                    data["parent"] = parent_category
+
+            # OAuth1 authentication
+            headeroauth = OAuth1(
+                woocommerce_user_key,
+                woocommerce_user_secret,
+                None,
+                None,
+                signature_method="HMAC-SHA1",
+            )
+
+
+            headers = {
+                "content-type": "application/json;charset=utf-8",
+                "Content-Length": "376",
+                "Connection": "keep-alive",
+                "Accept-Encoding":"gzip, deflate, br",
+                "Accept":"*/*",
+                "User-Agent":"PostmanRuntime/7.42.0"
+            }
+            
+            # Step 1: Check if category already exists in WooCommerce
+            check_response = requests.get(
+                url=woocommerce_create_category,
+                params={"search": doc.name},
+                auth=headeroauth,
+                headers=headers,
+            )
+
+            if check_response.ok:
+                categories = check_response.json()
+                if categories:  # found existing category
+                    existing_category = categories[0]
+                    doc.category_id = existing_category["id"]
+                    doc.save()
+                    frappe.msgprint(f"Category already exists in WooCommerce (ID: {doc.category_id})")
+                    return
+
+            # Step 2: Create category if not found
+            response = requests.post(
+                url=woocommerce_create_category,
+                data=json.dumps(data),
+                auth=headeroauth,
+                headers=headers,
+            )
+
+            if not response.ok:
+                frappe.throw(f"Failed to create category in WooCommerce: {response.text}")
+
+            returned_data = response.json()
+            doc.category_id = returned_data["id"]
+            doc.save()
+            frappe.msgprint(f"New category created in WooCommerce (ID: {doc.category_id})")
+
+            # frappe.throw(f"Failed to search for category: {response.text}")
 
     else:
         update_url = f"{woocommerce_api_base}/{doc.category_id}"
