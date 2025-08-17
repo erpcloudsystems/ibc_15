@@ -214,8 +214,17 @@ def validate(doc, method=None):
             )
 
             if not response.ok:
+                try:
+                    error = response.json()
+                    # If category already exists, set the existing ID
+                    if error.get("code") == "term_exists":
+                        doc.category_id = error["data"]["resource_id"]
+                        doc.save()
+                        frappe.msgprint(f"Category already exists in WooCommerce (ID: {doc.category_id})")
+                        return
+                except Exception:
+                    frappe.throw(f"Failed to create category in WooCommerce: {response.text}")
                 frappe.throw(f"Failed to create category in WooCommerce: {response.text}")
-
             returned_data = response.json()
             doc.category_id = returned_data["id"]
             doc.save()
