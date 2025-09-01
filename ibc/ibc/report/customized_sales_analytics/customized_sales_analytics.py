@@ -397,9 +397,10 @@ class Analytics(object):
 
 		for d in self.group_entries:
 			if d.parent:
-				self.depth_map.setdefault(d.name, self.depth_map.get(d.parent) + 1)
+				self.depth_map[d.name] = self.depth_map.get(d.parent, 0) + 1
 			else:
-				self.depth_map.setdefault(d.name, 0)
+				self.depth_map[d.name] = 0
+
 
 	def get_teams(self):
 		self.depth_map = frappe._dict()
