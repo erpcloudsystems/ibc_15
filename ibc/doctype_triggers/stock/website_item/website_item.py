@@ -15,7 +15,8 @@ def before_insert(doc, method=None):
 @frappe.whitelist()
 def after_insert(doc, method=None):
     if not doc.website_image:
-        frappe.throw(" Please Insert An Image For The Item ")
+        frappe.throw("Please Insert An Image For The Item.")
+
     # Get Single Values from Ecs Woocommerce seetings page
     price_list = frappe.db.get_single_value("Ecs Woocommerce", "price_list")
     woocommerce_user_key = frappe.db.get_single_value(
@@ -37,7 +38,6 @@ def after_insert(doc, method=None):
     if item1.discription_ar:
         doc.discription_ar = item1.discription_ar
     if item1.description:
-
         doc.description = item1.description
         doc.custom_website_description_en = item1.description
         doc.custom_short_website_description_en = item1.description
@@ -47,14 +47,11 @@ def after_insert(doc, method=None):
     # permalink = "https://example.com/product" + doc.web_item_name
     image = system_url + doc.website_image
     price = frappe.db.get_value(
-        "Item Price", {"item_code": sku,
-                       "price_list": price_list}, ["price_list_rate"]
+        "Item Price", {"item_code": sku, "price_list": price_list}, ["price_list_rate"]
     )
-    category_id = frappe.db.get_value(
-        "Item Group", doc.item_group, "category_id")
+    category_id = frappe.db.get_value("Item Group", doc.item_group, "category_id")
     if not category_id:
-        frappe.throw(" Item Group " + doc.item_group +
-                     " Has No WooCommerce ID ")
+        frappe.throw(" Item Group " + doc.item_group + " Has No WooCommerce ID.")
 
     # Create Data Structure
     data = {}
@@ -88,8 +85,9 @@ def after_insert(doc, method=None):
             )
 
         categories.append({"id": category_ids})
+        
     data["categories"] = categories
-    # frappe.msgprint(json.dumps(data))
+
     headeroauth = OAuth1(
         woocommerce_user_key,
         woocommerce_user_secret,
@@ -264,7 +262,7 @@ def validate(doc, method=None):
             custom_api_url = "https://vti.erf.mybluehost.me/website_af84c5e9/api/update-product.php"
 
             params = {
-                "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",  # exact token
+                "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
                 "id": doc.woocommerce_id,
                 "name": doc.item_name_ar or "",
                 "desc": doc.discription_ar or "",
