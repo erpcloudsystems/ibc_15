@@ -27,7 +27,16 @@ def before_save(doc, method=None):
     pass
 @frappe.whitelist()
 def on_update(doc, method=None):
-    pass
+    website_item = frappe.db.get_value("Website Item", {"item_code": doc.name}, "name")
+    if website_item:
+        # Fetch the website item document
+        website_item_doc = frappe.get_doc("Website Item", website_item)
+
+        # Update the description_ar field
+        website_item_doc.discription_ar = doc.discription_ar
+
+        # Save changes to the website item
+        website_item_doc.save(ignore_permissions=True)
 # @frappe.whitelist()
 # def validation_rate_fetch(doc):
 #     if doc.get('name'):
