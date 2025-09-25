@@ -54,16 +54,16 @@ def validate(doc, method=None):
                     data["type"] = "simple"
                     data["status"] = status
                     data["regular_price"] = str(price)
-                    data["description"] = item.web_long_description
-                    data["short_description"] = item.web_long_description
+                    data["description"] = item.description
+                    data["short_description"] = item.description
                     data["image"] = image
                     '''
                     images = []
                     images.append({"src": image})
                     data["images"] = images
                     '''
-                    # categories = []
-                    # categories.append({"id": category_id})
+                    categories = []
+                    categories.append({"id": category_id})
                     # data["categories"] = categories
                     woocommerce_id = item.woocommerce_id
                     frappe.msgprint(json.dumps(data))
@@ -72,7 +72,6 @@ def validate(doc, method=None):
                                         signature_method='HMAC-SHA1')
                     headers = {
                         "content-type": "application/json;charset=utf-8",
-                        "Content-Length": "376",
                         "Connection": "keep-alive",
                         "Accept-Encoding":"gzip, deflate, br",
                         "Accept":"*/*",
@@ -85,6 +84,44 @@ def validate(doc, method=None):
                         response.json(), ensure_ascii=False).encode("utf8")
                     response = encode_data.decode()
                     frappe.msgprint(response)
+        if item.item_name_ar or item.discription_ar:
+            custom_api_url = "https://vti.erf.mybluehost.me/website_af84c5e9/api/update-product.php"
+
+            params = {
+                "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
+                "id": item.woocommerce_id,
+                "name": item.item_name_ar or "",
+                "desc": item.discription_ar or "",
+                "short_desc": item.discription_ar or ""
+            }
+
+            try:
+                response = requests.post(
+                    url=custom_api_url,
+                    params=params,  # query string params
+                    data="",        # empty POST body
+                    headers={
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Connection": "keep-alive",
+                        "Accept": "*/*",
+                        "User-Agent": "PostmanRuntime/7.42.0",
+                        "Accept-Encoding": "gzip, deflate, br"
+                    }
+                )
+
+                response_text = response.content.decode("utf-8", errors="ignore").strip()
+
+                if response.status_code != 200:
+                    frappe.msgprint("❌ Arabic product update failed.")
+                    frappe.msgprint(f"Status: {response.status_code}")
+                    frappe.msgprint(f"Response:\n{response_text}")
+                else:
+                    frappe.msgprint("✅ Arabic product updated successfully.")
+                    frappe.msgprint(response_text)
+
+            except Exception as e:
+                frappe.log_error(frappe.get_traceback(), "Arabic Product Update API Error")
+                frappe.msgprint("❌ Failed to send Arabic fields to external API.")
 
 
 @frappe.whitelist()
