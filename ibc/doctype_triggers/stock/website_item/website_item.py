@@ -268,6 +268,7 @@ def validate(doc, method=None):
                 "desc": doc.discription_ar or "",
                 "short_desc": doc.discription_ar or ""
             }
+            # frappe.throw(str(doc.discription_ar))
             headeroauth = OAuth1(
                 woocommerce_user_key,
                 woocommerce_user_secret,
@@ -279,10 +280,9 @@ def validate(doc, method=None):
             try:
                 response = requests.post(
                     url=custom_api_url,
-                    params=params,  # query string params
-                    data="",        # empty POST body
-                    auth=headeroauth,
-
+                    # params=params,
+                    data=json.dumps(params, ensure_ascii=False),
+                    # auth=headeroauth,
                     headers={
                         "Content-Type": "application/x-www-form-urlencoded",
                         "Connection": "keep-alive",
