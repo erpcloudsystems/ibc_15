@@ -261,34 +261,37 @@ def validate(doc, method=None):
         if doc.item_name_ar or doc.discription_ar:
             custom_api_url = "https://vti.erf.mybluehost.me/website_af84c5e9/api/update-product.php"
 
-            payload = {
+            params = {
                 "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
                 "id": doc.woocommerce_id,
                 "name": doc.item_name_ar or "",
                 "desc": doc.discription_ar or "",
                 "short_desc": doc.discription_ar or ""
             }
+            headeroauth = OAuth1(
+                woocommerce_user_key,
+                woocommerce_user_secret,
+                None,
+                None,
+                signature_method="HMAC-SHA1"
+            )
 
             try:
-                # payload = {
-                #     "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
-                #     "id": doc.woocommerce_id,
-                #     "name": doc.item_name_ar or "",
-                #     "desc": doc.discription_ar or "",
-                #     "short_desc": doc.discription_ar or ""
-                # }
-
                 response = requests.post(
                     url=custom_api_url,
-                    data=payload,   # send as form-data (x-www-form-urlencoded)
+                    params=params,  # query string params
+                    data="",        # empty POST body
+                    auth=headeroauth,
+
                     headers={
                         "Content-Type": "application/x-www-form-urlencoded",
                         "Connection": "keep-alive",
                         "Accept": "*/*",
-                        "User-Agent": "FrappeRuntime/1.0",
+                        "User-Agent": "PostmanRuntime/7.42.0",
                         "Accept-Encoding": "gzip, deflate, br"
                     }
                 )
+
                 response_text = response.content.decode("utf-8", errors="ignore").strip()
 
                 if response.status_code != 200:
