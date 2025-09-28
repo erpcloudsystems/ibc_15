@@ -261,22 +261,22 @@ def validate(doc, method=None):
         if doc.item_name_ar or doc.discription_ar:
             custom_api_url = "https://vti.erf.mybluehost.me/website_af84c5e9/api/update-product.php"
 
-            # params = {
-            #     "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
-            #     "id": doc.woocommerce_id,
-            #     "name": doc.item_name_ar or "",
-            #     "desc": doc.discription_ar or "",
-            #     "short_desc": doc.discription_ar or ""
-            # }
+            payload = {
+                "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
+                "id": doc.woocommerce_id,
+                "name": doc.item_name_ar or "",
+                "desc": doc.discription_ar or "",
+                "short_desc": doc.discription_ar or ""
+            }
 
             try:
-                payload = {
-                    "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
-                    "id": doc.woocommerce_id,
-                    "name": doc.item_name_ar or "",
-                    "desc": doc.discription_ar or "",
-                    "short_desc": doc.discription_ar or ""
-                }
+                # payload = {
+                #     "token": "s3cr3tM1ddl3w4r3_T0k3n_2025_XyZ",
+                #     "id": doc.woocommerce_id,
+                #     "name": doc.item_name_ar or "",
+                #     "desc": doc.discription_ar or "",
+                #     "short_desc": doc.discription_ar or ""
+                # }
 
                 response = requests.post(
                     url=custom_api_url,
