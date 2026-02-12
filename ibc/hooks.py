@@ -679,6 +679,7 @@ scheduler_events = {
 	 ],
 	 "daily": [
  		"ibc.scheduler_events.daily.daily"
+
 	 ],
  	"hourly": [
  		"ibc.scheduler_events.hourly.hourly"
@@ -862,7 +863,12 @@ user_data_fields = [
 		"doctype": "{doctype_4}"
 	}
 ]
-
+after_migrate = [
+    "ibc.custom_docperm.restore_permissions"
+]
+before_migrate = [
+    "ibc.custom_docperm.snapshot_custom_docperm"
+]
 # Authentication and authorization
 # --------------------------------
 
