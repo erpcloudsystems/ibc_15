@@ -16,7 +16,7 @@ frappe.query_reports["Customer_Balances"] = {
 			"label": __("Fiscal Year"),
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
-			"default": "2024",
+			"default": String(new Date().getFullYear()),
 			"reqd": 1,
 			"on_change": function(query_report) {
 				var fiscal_year = query_report.get_values().fiscal_year;
@@ -36,13 +36,13 @@ frappe.query_reports["Customer_Balances"] = {
 			"fieldname": "from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.year_start(2024),
+			"default": frappe.datetime.year_start(),
 		},
 		{
 			"fieldname": "to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.year_end(2024),
+			"default": frappe.datetime.year_end(),
 		},
 		{
 			"fieldname":"party_type",
