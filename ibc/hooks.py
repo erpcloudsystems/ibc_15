@@ -693,6 +693,9 @@ scheduler_events = {
 	"cron": {
         "*/30 * * * *": [
             "ibc.scheduler_events.cron.cron"
+        ],
+        "*/3 * * * *": [
+            "ibc.scheduler_events.woocommerce_stock_sync.sync_woocommerce_stock"
         ]
     },
 }

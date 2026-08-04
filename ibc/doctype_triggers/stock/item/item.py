@@ -1,31 +1,31 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 from webshop.webshop.doctype.website_item.website_item import make_website_item
 import json
 import ast
 import requests
 
-@frappe.whitelist()
 def before_insert(doc, method=None):
     pass
-@frappe.whitelist()
+
 def after_insert(doc, method=None):
     pass
-@frappe.whitelist()
+
 def onload(doc, method=None):
     pass
     # validation_rate_fetch(doc)
-@frappe.whitelist()
+
 def before_validate(doc, method=None):
     pass
-@frappe.whitelist()
+
 def validate(doc, method=None):
     pass
-@frappe.whitelist()
+
 def before_save(doc, method=None):
     pass
-@frappe.whitelist()
+
 def on_update(doc, method=None):
     website_item = frappe.db.get_value("Website Item", {"item_code": doc.name}, "name")
     if website_item:
@@ -59,6 +59,35 @@ def on_update(doc, method=None):
 #                         doc.valuation_rate = bin_valuation_rate
 #                         doc.save()  # Save the document after setting the valuation_rate
 #                         frappe.db.commit()  # Ensure changes are committed to the database
+
+
+def sync_stock_qty(item_code):
+    """Recompute an item's stock qty from Bin and, if it changed, mirror it onto the
+    Item/Website Item and push it to WooCommerce.
+
+    Called every 3 minutes by ibc.scheduler_events.woocommerce_stock_sync (polling Bin
+    directly, since ERPNext updates Bin via raw SQL and never fires document events on it).
+    """
+    try:
+        stock_qty = flt(frappe.db.sql(
+            "select sum(actual_qty) from `tabBin` where item_code=%s", item_code
+        )[0][0])
+
+        if flt(frappe.db.get_value("Item", item_code, "custom_stock_qty")) != stock_qty:
+            frappe.db.set_value("Item", item_code, "custom_stock_qty", stock_qty, update_modified=False)
+
+        website_item = frappe.db.get_value(
+            "Website Item", {"item_code": item_code}, ["name", "stock_qty"], as_dict=True
+        )
+        if not website_item or flt(website_item.stock_qty) == stock_qty:
+            return
+
+        frappe.db.set_value("Website Item", website_item.name, "stock_qty", stock_qty, update_modified=False)
+
+        from ibc.doctype_triggers.stock.website_item.website_item import push_stock_qty
+        frappe.enqueue(push_stock_qty, queue="short", website_item=website_item.name, stock_qty=stock_qty)
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Item Stock Qty Sync Error")
 
 
 @frappe.whitelist()

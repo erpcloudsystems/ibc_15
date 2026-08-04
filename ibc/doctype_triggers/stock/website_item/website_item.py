@@ -313,3 +313,42 @@ def before_save(doc, method=None):
 @frappe.whitelist()
 def on_update(doc, method=None):
     pass
+
+
+def push_stock_qty(website_item, stock_qty):
+    """Send just the stock qty to WooCommerce for a Website Item, without touching
+    price/description/images (unlike validate(), which re-syncs the whole product)."""
+    woocommerce_id = frappe.db.get_value("Website Item", website_item, "woocommerce_id")
+    if not woocommerce_id:
+        return
+
+    woocommerce_user_key = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_key")
+    woocommerce_user_secret = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_user_secret")
+    woocommerce_create = frappe.db.get_single_value("Ecs Woocommerce", "woocommerce_create")
+    if not (woocommerce_user_key and woocommerce_user_secret and woocommerce_create):
+        return
+
+    headeroauth = OAuth1(
+        woocommerce_user_key,
+        woocommerce_user_secret,
+        None,
+        None,
+        signature_method="HMAC-SHA1",
+    )
+    headers = {
+        "Content-Type": "application/json;charset=utf-8",
+        "Accept": "*/*",
+    }
+
+    try:
+        response = requests.put(
+            url=f"{woocommerce_create}{woocommerce_id}",
+            data=json.dumps({"stock_qty": stock_qty}),
+            auth=headeroauth,
+            headers=headers,
+            timeout=10,
+        )
+        if not response.ok:
+            frappe.log_error(response.text, "WooCommerce Stock Qty Update Error")
+    except requests.exceptions.RequestException:
+        frappe.log_error(frappe.get_traceback(), "WooCommerce Stock Qty Update Error")
