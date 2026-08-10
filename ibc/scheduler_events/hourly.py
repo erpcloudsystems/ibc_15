@@ -1,17 +1,42 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import json, ast, requests
-from requests_oauthlib import OAuth1
 
-frappe.whitelist()
+
+@frappe.whitelist()
 def hourly():
-    frappe.db.sql(
-        """update tabItem inner join tabBin on tabItem.item_code = tabBin.item_code  join tabWarehouse on tabWarehouse.name = tabBin.warehouse set tabItem.valuation_rate = tabBin.valuation_rate where tabWarehouse.is_main_warehouse = 1 and tabItem.valuation_rate != tabBin.valuation_rate""")
-    frappe.db.sql(
-        """update tabBin inner join tabItem on tabItem.item_code = tabBin.item_code set tabBin.brand = tabItem.brand  """)
-    frappe.db.sql(
-        """update tabQuotation set tabQuotation.creator = tabQuotation.owner where tabQuotation.creator is null""")
-    frappe.db.sql(
-        """update tabBin join tabItem on tabBin.item_code = tabItem.name set tabBin.item_group = tabItem.item_group""")
+    # Update valuation_rate from Bin to Item (only where different)
+    frappe.db.sql("""
+        UPDATE tabItem i
+        INNER JOIN tabBin b ON i.name = b.item_code
+        INNER JOIN tabWarehouse w ON w.name = b.warehouse
+        SET i.valuation_rate = b.valuation_rate
+        WHERE w.is_main_warehouse = 1 
+        AND i.valuation_rate != b.valuation_rate
+    """)
+    
+    # Sync brand from Item to Bin (only where different or NULL)
+    frappe.db.sql("""
+        UPDATE tabBin b
+        INNER JOIN tabItem i ON i.name = b.item_code
+        SET b.brand = i.brand
+        WHERE b.brand != i.brand OR b.brand IS NULL
+    """)
+    
+    # Update Quotation creator where NULL
+    frappe.db.sql("""
+        UPDATE tabQuotation 
+        SET creator = owner 
+        WHERE creator IS NULL
+    """)
+    
+    # Sync item_group from Item to Bin (fixed join condition, only where different or NULL)
+    frappe.db.sql("""
+        UPDATE tabBin b
+        INNER JOIN tabItem i ON i.name = b.item_code
+        SET b.item_group = i.item_group
+        WHERE b.item_group != i.item_group OR b.item_group IS NULL
+    """)
+    
+    frappe.db.commit()
     

@@ -3,17 +3,18 @@ import frappe
 from frappe import _
 
 
-@frappe.whitelist()
 def before_insert(doc, method=None):
     pass
-@frappe.whitelist()
+
 def after_insert(doc, method=None):
     if doc.lead_name:
-        attachments = frappe.db.sql(
-            """ Select file_name, file_url
-                from `tabFile` where `tabFile`.attached_to_doctype = "Lead"
-                and `tabFile`.attached_to_name = "{name}"
-            """.format(name=doc.lead_name), as_dict=1)
+        # Fixed: Use parameterized query to prevent SQL injection
+        attachments = frappe.db.sql("""
+            SELECT file_name, file_url
+            FROM `tabFile` 
+            WHERE attached_to_doctype = 'Lead'
+            AND attached_to_name = %s
+        """, (doc.lead_name,), as_dict=1)
 
         for x in attachments:
             file = frappe.get_doc({
@@ -25,13 +26,12 @@ def after_insert(doc, method=None):
             })
             file.insert(ignore_permissions=True)
 
-@frappe.whitelist()
 def onload(doc, method=None):
     pass
-@frappe.whitelist()
+
 def before_validate(doc, method=None):
     pass
-@frappe.whitelist()
+
 def validate(doc, method=None):
     if doc.mobile_no and not doc.lead_name:
         existing_lead = frappe.db.exists(
@@ -40,13 +40,11 @@ def validate(doc, method=None):
                 "mobile_no": doc.mobile_no
             }
         )
-        frappe.msgprint(existing_lead)
         if existing_lead:
             frappe.throw(_("Mobile No already exists in Lead: {0}").format(existing_lead))
-    # pass
-@frappe.whitelist()
+
 def before_save(doc, method=None):
     pass
-@frappe.whitelist()
+
 def on_update(doc, method=None):
     pass

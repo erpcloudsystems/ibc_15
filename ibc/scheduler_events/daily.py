@@ -1,44 +1,81 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import json, ast, requests
-from requests_oauthlib import OAuth1
 
 
-frappe.whitelist()
+@frappe.whitelist()
 def daily():
-    frappe.db.sql(
-        """update `tabDelivery Note Item` join `tabItem` on `tabDelivery Note Item`.item_code = `tabItem`.name set `tabDelivery Note Item`.brand = `tabItem`.brand""")
-    frappe.db.sql(
-        """update `tabDelivery Note Item` join `tabItem` on `tabDelivery Note Item`.item_code = `tabItem`.name set `tabDelivery Note Item`.item_group = `tabItem`.item_group""")
-    frappe.db.sql(
-        """update `tabPurchase Invoice Item` join `tabItem` on `tabPurchase Invoice Item`.item_code = `tabItem`.name set `tabPurchase Invoice Item`.brand = `tabItem`.brand""")
-    frappe.db.sql(
-        """update `tabPurchase Invoice Item` join `tabItem` on `tabPurchase Invoice Item`.item_code = `tabItem`.name set `tabPurchase Invoice Item`.item_group = `tabItem`.item_group""")
-    frappe.db.sql(
-        """update `tabPurchase Order Item` join `tabItem` on `tabPurchase Order Item`.item_code = `tabItem`.name set `tabPurchase Order Item`.brand = `tabItem`.brand""")
-    frappe.db.sql(
-        """update `tabPurchase Order Item` join `tabItem` on `tabPurchase Order Item`.item_code = `tabItem`.name set `tabPurchase Order Item`.item_group = `tabItem`.item_group""")
-    frappe.db.sql(
-        """update `tabPurchase Receipt Item` join `tabItem` on `tabPurchase Receipt Item`.item_code = `tabItem`.name set `tabPurchase Receipt Item`.brand = `tabItem`.brand""")
-    frappe.db.sql(
-        """update `tabPurchase Receipt Item` join `tabItem` on `tabPurchase Receipt Item`.item_code = `tabItem`.name set `tabPurchase Receipt Item`.item_group = `tabItem`.item_group""")
-    frappe.db.sql(
-        """update `tabSales Invoice Item` join `tabItem` on `tabSales Invoice Item`.item_code = `tabItem`.name set `tabSales Invoice Item`.brand = `tabItem`.brand""")
-    frappe.db.sql(
-        """update `tabSales Invoice Item` join `tabItem` on `tabSales Invoice Item`.item_code = `tabItem`.name set `tabSales Invoice Item`.item_group = `tabItem`.item_group""")
-    frappe.db.sql(
-        """update `tabSales Order Item` join `tabItem` on `tabSales Order Item`.item_code = `tabItem`.name set `tabSales Order Item`.brand = `tabItem`.brand""")
-    frappe.db.sql(
-        """update `tabSales Order Item` join `tabItem` on `tabSales Order Item`.item_code = `tabItem`.name set `tabSales Order Item`.item_group = `tabItem`.item_group""")
-    frappe.db.sql(
-        """update `tabStock Ledger Entry` inner join tabItem on tabItem.item_code = `tabStock Ledger Entry`.item_code set `tabStock Ledger Entry`.brand = tabItem.brand where `tabStock Ledger Entry`.brand IS NULL""")
-    frappe.db.sql(
-        """update `tabStock Ledger Entry` join tabItem on `tabStock Ledger Entry`.item_code = tabItem.name set `tabStock Ledger Entry`.item_group = tabItem.item_group""")
+    # Combined brand and item_group updates for each DocType (14 queries -> 7 queries)
+    # Added WHERE clause to only update records that differ
+    
+    # Delivery Note Item
+    frappe.db.sql("""
+        UPDATE `tabDelivery Note Item` t
+        JOIN `tabItem` i ON t.item_code = i.name
+        SET t.brand = i.brand, t.item_group = i.item_group
+        WHERE t.brand != i.brand OR t.item_group != i.item_group
+           OR t.brand IS NULL OR t.item_group IS NULL
+    """)
+    
+    # Purchase Invoice Item
+    frappe.db.sql("""
+        UPDATE `tabPurchase Invoice Item` t
+        JOIN `tabItem` i ON t.item_code = i.name
+        SET t.brand = i.brand, t.item_group = i.item_group
+        WHERE t.brand != i.brand OR t.item_group != i.item_group
+           OR t.brand IS NULL OR t.item_group IS NULL
+    """)
+    
+    # Purchase Order Item
+    frappe.db.sql("""
+        UPDATE `tabPurchase Order Item` t
+        JOIN `tabItem` i ON t.item_code = i.name
+        SET t.brand = i.brand, t.item_group = i.item_group
+        WHERE t.brand != i.brand OR t.item_group != i.item_group
+           OR t.brand IS NULL OR t.item_group IS NULL
+    """)
+    
+    # Purchase Receipt Item
+    frappe.db.sql("""
+        UPDATE `tabPurchase Receipt Item` t
+        JOIN `tabItem` i ON t.item_code = i.name
+        SET t.brand = i.brand, t.item_group = i.item_group
+        WHERE t.brand != i.brand OR t.item_group != i.item_group
+           OR t.brand IS NULL OR t.item_group IS NULL
+    """)
+    
+    # Sales Invoice Item
+    frappe.db.sql("""
+        UPDATE `tabSales Invoice Item` t
+        JOIN `tabItem` i ON t.item_code = i.name
+        SET t.brand = i.brand, t.item_group = i.item_group
+        WHERE t.brand != i.brand OR t.item_group != i.item_group
+           OR t.brand IS NULL OR t.item_group IS NULL
+    """)
+    
+    # Sales Order Item
+    frappe.db.sql("""
+        UPDATE `tabSales Order Item` t
+        JOIN `tabItem` i ON t.item_code = i.name
+        SET t.brand = i.brand, t.item_group = i.item_group
+        WHERE t.brand != i.brand OR t.item_group != i.item_group
+           OR t.brand IS NULL OR t.item_group IS NULL
+    """)
+    
+    # Stock Ledger Entry - only update where NULL or different
+    frappe.db.sql("""
+        UPDATE `tabStock Ledger Entry` sle
+        JOIN `tabItem` i ON sle.item_code = i.name
+        SET sle.brand = i.brand, sle.item_group = i.item_group
+        WHERE sle.brand IS NULL OR sle.item_group IS NULL
+           OR sle.brand != i.brand OR sle.item_group != i.item_group
+    """)
+    
+    frappe.db.commit()
     
     #update_woocommerce()
   
-frappe.whitelist()
+@frappe.whitelist()
 def update_woocommerce():
     pass
     ## Get Single Values from Ecs Woocommerce seetings page

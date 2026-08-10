@@ -1,256 +1,280 @@
-# Agents.md — IBC (ERPNext v15)
+# AI Agent Instructions for IBC App
 
-Owner: ERP Cloud Systems  
-Target Site: ibc.erpnext.cloud  
-Stack: ERPNext v15 + custom app `ibc` (backend API + fixtures) + frontend  
+This document provides instructions for AI agents working on the `ibc` custom ERPNext application.
 
 ---
 
-## 🔴 Critical Agent Rules (Read First)
+## Quick Start
 
-1. The agent must **automatically append every chat message** into:
-
-
-chats/YYYY-MM-DD.md
-
-
-- Acts as auto-save
-- Messages must be appended in order
-2. When asked to **read `Agents.md`**, the agent must:
-- Read **all chat files**
-- Sort by date
-- Fully hydrate context before responding
-3. The agent must **automatically update `Changelog.md`** on **every change**
-4. **NEVER edit this file (`Agents.md`)**
-5. The agent has **full access** — never ask for read/write/update permissions
-6. **Before creating any `.py`, `.js`, `.json`:**
-- Ask first to create the **Doctype / Child Table as blank** in ERPNext
-7. **Standard DocType customizations**
-- Must be done via **fixtures**
-- Never modify core files directly
+1. **Read this file first** to understand the app structure and conventions
+2. **Read `README.md`** for detailed app documentation
 
 ---
 
-## 📦 Repository Structure (Canonical)
+## Project Overview
 
+- **App Name:** `ibc`
+- **App Title:** ibc
+- **Module:** Ibc
+- **Framework:** Frappe/ERPNext
+- **Publisher:** erpcloud.systems
+- **Email:** mg@erpcloud.systems
+- **License:** MIT
+- **Version:** 0.0.1
 
-
-apps/ibc/
-│
-├── Agents.md
-├── Changelog.md
-├── README.md
-│
-├── chats/
-│   └── YYYY-MM-DD.md
-│
-├── ibc/
-│   │
-│   ├── doctype_triggers/      # Document event handlers by module
-│   │   ├── accounting/
-│   │   ├── buying/
-│   │   ├── crm/
-│   │   ├── hr/
-│   │   ├── manufacturing/
-│   │   ├── projects/
-│   │   ├── selling/
-│   │   └── stock/
-│   │
-│   ├── scheduler_events/      # Time-based jobs grouped by cadence
-│   ├── hooks.py               # Main hooks configuration
-│   ├── config/
-│   ├── fixtures/
-│   ├── public/
-│   ├── templates/
-│   └── www/
-
-
+This is a **Business Customization Application** for ERPNext providing:
+- Document triggers for 46 DocTypes across 8 modules
+- 21 custom DocTypes for business operations
+- 74 custom field definitions extending standard ERPNext DocTypes
+- 58 custom reports for sales, stock, brands, and accounting
+- Custom DocPerm snapshot/restore utilities for migrations
+- Scheduled tasks for data synchronization and updates
+- WooCommerce integration support (commented out)
 
 ---
 
-## 🧠 Doctype Triggers
+## Key File Locations
 
-**Path**
+### Configuration
+| File | Purpose |
+|------|---------|
+| `ibc/hooks.py` | Main Frappe hooks (~53KB) - doc_events, scheduler_events, fixtures |
+| `ibc/modules.txt` | Module definition ("Ibc") |
+| `ibc/__init__.py` | Package init with version |
+| `setup.py` | Python setup configuration |
 
+### Core Files
+| File | Purpose | Size |
+|------|---------|------|
+| `ibc/custom_docperm.py` | Custom DocPerm snapshot/restore utilities for migrations | ~3KB |
 
-ibc/doctype_triggers/<module>/<doctype>/<doctype>.py
-ibc/doctype_triggers/<module>/<doctype>/<doctype>.js
+### Document Triggers
+Located in `ibc/doctype_triggers/` organized by module:
 
-`
+| Module | Path | DocTypes |
+|--------|------|----------|
+| **accounting** | `doctype_triggers/accounting/` | Journal Entry, Payment Entry, Purchase Invoice, Sales Invoice |
+| **buying** | `doctype_triggers/buying/` | Material Request, Purchase Order, Request For Quotation, Supplier, Supplier Group, Supplier Quotation |
+| **crm** | `doctype_triggers/crm/` | Address, Contact, Lead, Opportunity |
+| **hr** | `doctype_triggers/hr/` | Additional Salary, Attendance, Attendance Request, Employee, Employee Advance, Employee Checkin, Expense Claim, Leave Application, Loan, Loan Application, Loan Disbursement, Loan Repayment, Loan Type, Payroll Entry, Salary Component, Salary Slip, Salary Structure |
+| **manufacturing** | `doctype_triggers/manufacturing/` | BOM, Job Card, Work Order |
+| **projects** | `doctype_triggers/projects/` | Project, Task, Timesheet |
+| **selling** | `doctype_triggers/selling/` | Customer, Customer Group, Pricing Rule, Quotation, Sales Order, Sales Partner, Sales Person, Territory |
+| **stock** | `doctype_triggers/stock/` | Delivery Note, Item, Item Group, Item Price, Price List, Purchase Receipt, Stock Entry, Stock Reconciliation, Website Item |
 
-**Supported Events**
-- before_insert
-- after_insert
-- onload
-- before_validate
-- validate
-- before_save
-- on_submit
-- on_cancel
-- before_cancel
-- on_update
-- on_update_after_submit
+### Custom DocTypes (21 DocTypes)
+Located in `ibc/ibc/doctype/`:
 
-**hooks.py**
+| DocType | Purpose |
+|---------|---------|
+| `ecs_woocommerce` | WooCommerce integration settings |
+| `extra_salary` | Extra salary management |
+| `healthcare_practitioner` | Healthcare practitioner records |
+| `inpatient_medication_entry` | Inpatient medication entry |
+| `inpatient_medication_entry_detail` | Medication entry details (child table) |
+| `installation_territory` | Installation territory management |
+| `item_request` | Item request management |
+| `item_request_table` | Item request details (child table) |
+| `patient` | Patient records |
+| `payroll_policy` | Payroll policy settings |
+| `salary_effects_posting` | Salary effects posting |
+| `sn` | Serial number management |
+| `sn_table` | Serial number table (child table) |
+| `system_type` | System type master |
+| `technical_support` | Technical support records |
+| `testf` | Test form |
+| `ticket` | Ticket/support management |
+| `ticket_items` | Ticket items (child table) |
+| `website_item` | Website item customization |
+
+### Custom Field Definitions (74 Files)
+Located in `ibc/ibc/custom/`:
+
+Extends standard ERPNext DocTypes including:
+- **Accounting:** Journal Entry, Journal Entry Account, Payment Entry, Payment Entry Deduction, Payment Entry Reference, Purchase Invoice, Sales Invoice, Sales Taxes and Charges
+- **Buying:** Material Request, Material Request Item, Purchase Order, Purchase Order Item, Purchase Receipt, Supplier, Supplier Group, Supplier Quotation
+- **CRM:** Contact, Contact Phone, Lead, Lead Source, Opportunity, Opportunity Item
+- **HR:** Attendance, Employee, Employee Advance, Expense Claim, Expense Claim Detail, Loan, Payroll Entry, Salary Component, Salary Slip, Salary Structure
+- **Projects:** Project, Task
+- **Selling:** Customer, Customer Group, Pricing Rule, Quotation, Quotation Item, Sales Order, Sales Order Item, Sales Partner, Sales Person, Sales Team, Territory
+- **Stock:** Brand, Delivery Note, Delivery Note Item, Item, Item Barcode, Item Group, Item Price, Packed Item, Price List, Product Bundle, Product Bundle Item, Stock Entry, Stock Entry Detail, Warehouse, Website Item
+- **Other:** Campaign, Company, Installation Note, Installation Note Item, Maintenance Schedule, Maintenance Visit, Maintenance Visit Purpose, Ticket, Ticket Items
+
+### Custom Reports (58 Reports)
+Located in `ibc/ibc/report/`:
+
+| Category | Reports |
+|----------|---------|
+| **Brand/Stock Reports** | `brand_added_value_report`, `brands_report`, `brands_stock_(year)`, `brands_stocks_report_2021`, `new_stock_brand`, `new_stocks_brand`, `newest_stocks_brand`, `stock_balances`, `stock_brands_value`, `stock_items_report`, `yearly_brands_stock_report` |
+| **Sales Reports** | `custom_sales_person_wise_transaction_summary`, `customer_balances`, `customer_sales_brand_wise`, `customized_sales_analytics`, `discounted_sales_invoice`, `discounted_sales_invoice_2`, `discounted_sales_invoice_filtered`, `discounted_sales_invoice_filtered_(sales_director)`, `new_gross_profit`, `new_sales_analytics`, `sales_person_monthly_target`, `sales_person_sales`, `sales_person_target`, `sales_persons_sales`, `sales_persons_sales_script_report`, `sales_report`, `sales_return_report`, `sales_return_report_2` |
+| **Purchase Reports** | `customized_purchase_analytics` |
+| **Stock Analytics** | `comparison_between_items_in_bin_and_stock_ledger_entry`, `customized_stock_analytics`, `items_in_stock_ledger_entry`, `summary_stock_with_ordered`, `total_summary_stock`, `total_summary_stock_cost`, `valuation_rate_report` |
+| **Accounting Reports** | `cheques_report_auto_email`, `general_entry_2`, `general_ledger2` |
+| **Item Reports** | `inactive_item`, `new_items_transaction`, `new_items_transaction_cost`, `va_report`, `va_report_2` |
+| **Maintenance/Service** | `installation_note_report`, `maintenance_report`, `maintenance_visit_report`, `spare_parts_report`, `tickets_report_by_item_group` |
+| **Returns** | `return_details`, `returns_report` |
+
+### Scheduler Events
+Located in `ibc/scheduler_events/`:
+
+| File | Schedule | Purpose |
+|------|----------|---------|
+| `all.py` | Every minute | Repost item valuation, update summary stock |
+| `hourly.py` | Every hour | Update valuation rates, sync brand/item_group to Bin, update Quotation creator |
+| `daily.py` | Daily | Sync brand/item_group to transaction items (DN, PI, PO, PR, SI, SO), Stock Ledger Entry updates |
+| `weekly.py` | Weekly | Placeholder |
+| `monthly.py` | Monthly | Placeholder |
+| `cron.py` | */30 * * * * | Placeholder |
+
+### Fixtures
+Located in `ibc/fixtures/`:
+
+| File | Purpose |
+|------|---------|
+| `property_setter.json` | Property Setter configurations (~308KB) |
+
+### Migration Hooks
+| Hook | Function | Purpose |
+|------|----------|---------|
+| `before_migrate` | `ibc.custom_docperm.snapshot_custom_docperm` | Snapshot Custom DocPerm before migration |
+| `after_migrate` | `ibc.custom_docperm.restore_permissions` | Restore Custom DocPerm after migration |
+
+### Assets
+| Hook | Path |
+|------|------|
+| `app_include_css` | `/assets/ibc/css/ecs.css` |
+| `app_include_js` | `/assets/ibc/js/ecs.js` |
+| `web_include_js` | `/assets/js/web_ecs.min.js` |
+| `web_include_css` | `/assets/js/web_ecs.min.css` |
+
+---
+
+## Coding Conventions
+
+### 1. Document Triggers
+
+Each DocType has its own folder with Python and JavaScript files:
+```
+doctype_triggers/{module}/{doctype_name}/
+├── {doctype_name}.py    # Python event handlers
+└── {doctype_name}.js    # JavaScript client-side handlers
+```
+
+Python trigger functions follow this pattern:
 ```python
-doc_events = {
-    "Sales Invoice": {
-        "before_save": "ibc.doctype_triggers.accounting.sales_invoice.sales_invoice.before_save"
-    },
-    "Delivery Note": {
-        "onload": "ibc.doctype_triggers.stock.delivery_note.delivery_note.onload"
-    }
-}
+import frappe
+
+def before_insert(doc, method):
+    """Called before document is inserted."""
+    pass
+
+def validate(doc, method):
+    """Called during document validation."""
+    pass
+
+def on_submit(doc, method):
+    """Called after document is submitted."""
+    pass
+```
+
+### 2. API Endpoints
+
+All API endpoints use `@frappe.whitelist()` decorator:
+
+```python
+import frappe
+
+@frappe.whitelist()
+def my_function(param1, param2=None):
+    """
+    Description of what this function does.
+    
+    Args:
+        param1: Description
+        param2: Optional description
+    
+    Returns:
+        dict: Description of return value
+    """
+    # Implementation
+    return result
+
+@frappe.whitelist(allow_guest=True)
+def public_function():
+    """For endpoints accessible without login"""
+    pass
+```
+
+### 3. Custom Fields
+
+When creating custom fields:
+- **Module must be:** `Ibc`
+- **Fieldname prefix:** Use `custom_` prefix for clarity
+
+### 4. Adding New DocType Triggers
+
+1. Create folder: `doctype_triggers/{module}/{doctype_name}/`
+2. Create `{doctype_name}.py` with event handler functions
+3. Create `{doctype_name}.js` for client-side logic
+4. Register in `hooks.py` under `doc_events` and `doctype_js`
+
+---
+
+## Testing
+
+### Bench Commands
+```bash
+# Run tests
+bench --site {site} run-tests --app ibc
+
+# Clear cache
+bench --site {site} clear-cache
+
+# Migrate
+bench --site {site} migrate
+
+# Export fixtures
+bench --site {site} export-fixtures
+```
+
+### Common Debug Patterns
+```python
+# Debug print
+frappe.msgprint(f"Debug: {variable}")
+
+# Throw error
+frappe.throw("Error message")
+
+# Log error
+frappe.log_error(f"Error: {str(e)}", "Error Title")
+
+# Check if exists
+if frappe.db.exists("DocType", "name"):
+    pass
+
+# Get document
+doc = frappe.get_doc("DocType", "name")
+doc = frappe.get_cached_doc("DocType", "name")  # Cached version
+
+# SQL query
+result = frappe.db.sql("""
+    SELECT * FROM `tabDocType` WHERE field = %s
+""", (value,), as_dict=True)
 ```
 
 ---
 
-## ⏱ Scheduler Events
+## Important Notes
 
-**Location**
-
-
-ibc/scheduler_events/ (all.py, cron.py, daily.py, hourly.py, monthly.py, weekly.py)
-
-
-**Cadences**
-
-* all          (every 5 minutes)
-* hourly
-* daily
-* weekly
-* monthly
-* cron         (explicit expressions)
-
-**Rules**
-
-* Idempotent
-* Short execution
-* Logged clearly
-* Retry safe
+1. **Never modify core ERPNext files** - use hooks and overrides
+2. **Always test on development** before production
+3. **Use fixtures** for configuration data that should persist
+4. **Follow existing patterns** when adding new functionality
+5. **Custom DocPerm** is automatically backed up before migrations and restored after
 
 ---
 
-## 🚀 Performance Rules (Mandatory)
+## Contact & Support
 
-### Database
-
-* ❌ frappe.db.get_value
-* ✅ frappe.db.get_cached_value
-
-### Bulk Reads
-
-* ❌ Queries inside loops
-* ✅ frappe.get_all / frappe.get_list
-
-### Child Tables
-
-* Avoid append in loops
-* Build list then extend
-
-### Client Scripts
-
-* Minimize frm.refresh()
-* Avoid render loops
-
-### Background Jobs
-
-* Heavy logic → enqueue
-* UI logic → lightweight only
-
----
-
-## 📊 Performance Reporting (Internal)
-
-**Location**
-
-
-ibc/performance/ (if needed)
-
-
-**Files**
-
-* performance_log.md
-* query_changes.md
-* optimization_summary.md
-
-Tracks:
-
-* Cached value replacements
-* Query count reductions
-* Hook optimizations
-* Load-time improvements
-
----
-
-## 🧩 Custom Fields (Fixtures Only)
-
-**Structure**
-
-
-ibc/fixtures/custom_field.json
-
-
-**hooks.py**
-
-```python
-fixtures = [
-    {
-        "doctype": "Custom Field",
-        "filters": [
-            ["module", "ibc"]
-        ]
-    }
-]
-```
-
-**Rules**
-
-* Module must always be `ibc`
-* Includes old + new custom fields
-* Mandatory before migration
-
----
-
-## 🧱 Additional Structures
-
-### Workflows
-
-
-ibc/workflows/
-
-
-### Permissions
-
-
-ibc/permissions/
-
-
-
-### Shared Utilities
-
-
-ibc/utils/
-
-
----
-
-## 📝 Change Management
-
-* Every change must:
-
-  * Append to `Changelog.md`
-  * Include date, file, reason
-  * Mention performance impact if any
-
----
-
-## 🧠 Agent Mindset
-
-* Performance first
-* Fixtures before code
-* Ask before creating doctypes
-* Never touch core
-* Always migration-safe
-
----
+- **Publisher:** erpcloud.systems
+- **Email:** mg@erpcloud.systems
