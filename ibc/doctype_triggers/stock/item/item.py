@@ -61,6 +61,13 @@ def on_update(doc, method=None):
 #                         frappe.db.commit()  # Ensure changes are committed to the database
 
 
+def get_stock_qty(item_code):
+    """Total actual_qty for an item across all warehouses, read straight from Bin."""
+    return flt(frappe.db.sql(
+        "select sum(actual_qty) from `tabBin` where item_code=%s", item_code
+    )[0][0])
+
+
 def sync_stock_qty(item_code):
     """Recompute an item's stock qty from Bin and, if it changed, mirror it onto the
     Item/Website Item and push it to WooCommerce.
@@ -69,9 +76,7 @@ def sync_stock_qty(item_code):
     directly, since ERPNext updates Bin via raw SQL and never fires document events on it).
     """
     try:
-        stock_qty = flt(frappe.db.sql(
-            "select sum(actual_qty) from `tabBin` where item_code=%s", item_code
-        )[0][0])
+        stock_qty = get_stock_qty(item_code)
 
         if flt(frappe.db.get_value("Item", item_code, "custom_stock_qty")) != stock_qty:
             frappe.db.set_value("Item", item_code, "custom_stock_qty", stock_qty, update_modified=False)

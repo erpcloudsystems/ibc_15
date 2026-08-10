@@ -197,6 +197,12 @@ def validate(doc, method=None):
         # Set status based on published flag
         status = "publish" if doc.published == 1 else "draft"
 
+        # Stock qty, read fresh from Bin so it's always current as of this save
+        from ibc.doctype_triggers.stock.item.item import get_stock_qty
+        stock_qty = get_stock_qty(sku)
+        doc.stock_qty = stock_qty
+        frappe.db.set_value("Item", sku, "custom_stock_qty", stock_qty, update_modified=False)
+
         # Create Data Structure for WooCommerce API
         data = {
             "name": item_name,
@@ -206,7 +212,9 @@ def validate(doc, method=None):
             "regular_price": str(price or 0),
             "description": doc.description or "",
             "short_description": doc.description or "",
-            "images": [{"src": image}]
+            "images": [{"src": image}],
+            "manage_stock": True,
+            "stock_quantity": stock_qty,
         }
 
         # Add categories
@@ -343,7 +351,7 @@ def push_stock_qty(website_item, stock_qty):
     try:
         response = requests.put(
             url=f"{woocommerce_create}{woocommerce_id}",
-            data=json.dumps({"stock_qty": stock_qty}),
+            data=json.dumps({"manage_stock": True, "stock_quantity": stock_qty}),
             auth=headeroauth,
             headers=headers,
             timeout=10,
