@@ -75,6 +75,8 @@ def get_columns(group_wise_columns, filters):
 		"actual_amount": _("Actual Amount") + ":Currency:100",
 		"base_amount": _("Selling Amount") + ":Currency/currency:100",
 		"buying_amount": _("Buying Amount") + ":Currency/currency:100",
+		"gross_profit": _("Gross Profit") + ":Currency/currency:100",
+		"gross_profit_percent": _("Gross Profit %") + ":Percent:100",
 		"actual_profit": _("Actual Profit") + ":Currency/currency:100",
 		"actual_profit_percent": _("Actual Profit %") + ":Percent:100",
 		"project": _("Project") + ":Link/Project:100",

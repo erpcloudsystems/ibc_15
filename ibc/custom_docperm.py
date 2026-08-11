@@ -7,7 +7,7 @@ import glob
 SNAPSHOT_FOLDER = "permission_snapshots"
 SNAPSHOT_FILE = "custom_docperm.json"
 
-
+#
 def snapshot_custom_docperm():
     """
     Daily scheduler task: Export all Custom DocPerm to a single JSON file.
