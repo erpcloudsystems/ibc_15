@@ -696,6 +696,9 @@ scheduler_events = {
         ],
         "*/3 * * * *": [
             "ibc.scheduler_events.woocommerce_stock_sync.sync_woocommerce_stock"
+        ],
+        "*/10 * * * *": [
+            "ibc.scheduler_events.notification_dedup.dedupe_notification_logs"
         ]
     },
 }
@@ -824,6 +827,10 @@ web_include_css = "/assets/js/web_ecs.min.css"
 # Overriding Methods
 # ------------------------------
 #
+override_whitelisted_methods = {
+	"frappe.desk.doctype.notification_log.notification_log.get_notification_logs": "ibc.overrides.notification_log.get_notification_logs"
+}
+
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "ibc.event.get_events"
 # }
