@@ -31,6 +31,54 @@ frappe.query_reports["Gross Profit Custom"] = {
 			"options": "Sales Invoice"
 		},
 		{
+			"fieldname":"sales_person",
+			"label": __("Sales Person"),
+			"fieldtype": "Link",
+			"options": "Sales Person"
+		},
+		{
+			"fieldname":"item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group"
+		},
+		{
+			"fieldname":"warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: [["Warehouse", "company", "=", company]]
+				};
+			}
+		},
+		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: [["Cost Center", "company", "=", company]]
+				};
+			}
+		},
+		{
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: [["Project", "company", "=", company]]
+				};
+			}
+		},
+		{
 			"fieldname":"group_by",
 			"label": __("Group By"),
 			"fieldtype": "Select",

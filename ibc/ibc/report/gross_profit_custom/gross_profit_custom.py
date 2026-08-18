@@ -335,6 +335,22 @@ class GrossProfitGenerator(object):
 		if self.filters.get("item_code"):
 			conditions += " and `tabSales Invoice Item`.item_code = %(item_code)s"
 
+		if self.filters.get("item_group"):
+			conditions += " and `tabSales Invoice Item`.item_group = %(item_group)s"
+
+		if self.filters.get("warehouse"):
+			conditions += " and `tabSales Invoice Item`.warehouse = %(warehouse)s"
+
+		if self.filters.get("cost_center"):
+			conditions += " and `tabSales Invoice Item`.cost_center = %(cost_center)s"
+
+		if self.filters.get("project"):
+			conditions += " and `tabSales Invoice`.project = %(project)s"
+
+		if self.filters.get("sales_person"):
+			conditions += """ and exists (select 1 from `tabSales Team` st
+				where st.parent = `tabSales Invoice`.name and st.sales_person = %(sales_person)s)"""
+
 		# Exclude service item groups / brand from Gross Profit calculation altogether,
 		# regardless of which filter or group_by mode is used.
 		excluded_item_groups = ", ".join(frappe.db.escape(d) for d in EXCLUDED_ITEM_GROUPS)
