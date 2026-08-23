@@ -36,7 +36,7 @@ def validate(doc, method=None):
                     permalink = "https://example.com/product" + item.web_item_name
                     brand = item.brand
                     item_group = item.item_group
-                    image = system_url + item.website_image
+                    image = system_url.rstrip("/") + "/" + item.website_image.lstrip("/")
                     price = doc.price_list_rate
                     category_id = frappe.db.get_value('Item Group', {'name': item.item_group}, 'category_id')
                     if item.published == 1:
@@ -122,7 +122,8 @@ def validate(doc, method=None):
                             "Connection": "keep-alive",
                             "Accept":"*/*",
                             "User-Agent":"PostmanRuntime/7.42.0",
-                            "Accept-Encoding":"gzip, deflate, br"
+                            "Accept-Encoding":"gzip, deflate, br",
+                            "Cookie": "humans_21909=1"
                         }
                     )
 

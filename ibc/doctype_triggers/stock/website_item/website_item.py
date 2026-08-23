@@ -45,7 +45,7 @@ def after_insert(doc, method=None):
     doc.save()
     item_name = doc.web_item_name
     # permalink = "https://example.com/product" + doc.web_item_name
-    image = system_url + doc.website_image
+    image = system_url.rstrip("/") + "/" + doc.website_image.lstrip("/")
     price = frappe.db.get_value(
         "Item Price", {"item_code": sku, "price_list": price_list}, ["price_list_rate"]
     )
@@ -108,6 +108,10 @@ def after_insert(doc, method=None):
     )
     frappe.msgprint(response.content)
     returned_data = json.loads(response.content)
+    if "id" not in returned_data:
+        frappe.throw(
+            f"WooCommerce rejected product creation: {returned_data.get('message') or returned_data}"
+        )
     doc.woocommerce_id = returned_data["id"]
     if doc.item_name_ar or doc.discription_ar:
         # normalize the base URL (no trailing slash)
@@ -122,12 +126,13 @@ def after_insert(doc, method=None):
         }
 
         try:
-            headers={           
+            headers={
                     "Content-Type": "application/json",
                     "Connection": "keep-alive",
                     "Accept":"*/*",
                     "User-Agent":"PostmanRuntime/7.42.0",
-                    "Accept-Encoding":"gzip, deflate, br"
+                    "Accept-Encoding":"gzip, deflate, br",
+                    "Cookie": "humans_21909=1"
                 }
             # send as form-encoded POST
             api_response = requests.post(
@@ -183,7 +188,7 @@ def validate(doc, method=None):
         # Get Values From Website Item and Item
         sku = doc.item_code
         item_name = doc.web_item_name
-        image = system_url + doc.website_image
+        image = system_url.rstrip("/") + "/" + doc.website_image.lstrip("/")
         price = frappe.db.get_value(
             "Item Price",
             {"item_code": sku, "price_list": price_list},
@@ -276,27 +281,19 @@ def validate(doc, method=None):
                 "desc": doc.discription_ar or "",
                 "short_desc": doc.discription_ar or ""
             }
-            # frappe.throw(str(doc.discription_ar))
-            headeroauth = OAuth1(
-                woocommerce_user_key,
-                woocommerce_user_secret,
-                None,
-                None,
-                signature_method="HMAC-SHA1"
-            )
 
             try:
                 response = requests.post(
                     url=custom_api_url,
-                    # params=params,
-                    data=json.dumps(params, ensure_ascii=False),
-                    # auth=headeroauth,
+                    params=params,  # query string params
+                    data="",        # empty POST body
                     headers={
-                        "Content-Type": "application/x-www-form-urlencoded",
+                        "Content-Type": "application/json",
                         "Connection": "keep-alive",
                         "Accept": "*/*",
                         "User-Agent": "PostmanRuntime/7.42.0",
-                        "Accept-Encoding": "gzip, deflate, br"
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Cookie": "humans_21909=1"
                     }
                 )
 
