@@ -36,3 +36,13 @@ def before_save(doc, method=None):
 @frappe.whitelist()
 def on_update(doc, method=None):
     pass
+def before_rename(doc, method, old, new, merge=False):
+    if frappe.session.user == "Administrator":
+        return
+
+    roles = set(frappe.get_roles(frappe.session.user))
+    if "Sales User" in roles and not roles & {"System Manager", "Sales Manager"}:
+        frappe.throw(
+            _("You are not permitted to edit the ID of this Lead. Please contact your Sales Manager or System Manager."),
+            frappe.PermissionError,
+        )

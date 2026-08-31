@@ -164,6 +164,7 @@ doc_events = {
 		"on_update_after_submit": "ibc.doctype_triggers.crm.lead.lead.on_update_after_submit",
 		"before_save": "ibc.doctype_triggers.crm.lead.lead.before_save",
 		"on_update": "ibc.doctype_triggers.crm.lead.lead.on_update",
+		"before_rename": "ibc.doctype_triggers.crm.lead.lead.before_rename",
 	},
 	"Opportunity": {
 		"before_insert": "ibc.doctype_triggers.crm.opportunity.opportunity.before_insert",
@@ -510,6 +511,7 @@ doc_events = {
 		"before_save": "ibc.doctype_triggers.selling.quotation.quotation.before_save",
 		"before_cancel": "ibc.doctype_triggers.selling.quotation.quotation.before_cancel",
 		"on_update": "ibc.doctype_triggers.selling.quotation.quotation.on_update",
+		"before_rename": "ibc.doctype_triggers.selling.quotation.quotation.before_rename",
 	},
 	"Sales Order": {
 		"before_insert": "ibc.doctype_triggers.selling.sales_order.sales_order.before_insert",
@@ -523,6 +525,7 @@ doc_events = {
 		"before_save": "ibc.doctype_triggers.selling.sales_order.sales_order.before_save",
 		"before_cancel": "ibc.doctype_triggers.selling.sales_order.sales_order.before_cancel",
 		"on_update": "ibc.doctype_triggers.selling.sales_order.sales_order.on_update",
+		"before_rename": "ibc.doctype_triggers.selling.sales_order.sales_order.before_rename",
 	},
 	"Delivery Note": {
 		"before_insert": "ibc.doctype_triggers.stock.delivery_note.delivery_note.before_insert",
