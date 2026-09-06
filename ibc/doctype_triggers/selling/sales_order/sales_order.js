@@ -13,4 +13,14 @@ frappe.ui.form.on("Sales Order", {
 				.remove();
 		}
 	},
+
+	validate(frm) {
+		if (!frm.doc.custom_mobile_no) {
+			frappe.throw(
+				__('لا يمكنك الاستمرار في أمر البيع هذا حتى تقوم بتعيين رقم الموبايل للعميل "{0}"', [
+					frm.doc.customer_name || frm.doc.customer,
+				])
+			);
+		}
+	},
 });
