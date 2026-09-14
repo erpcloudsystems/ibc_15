@@ -831,7 +831,8 @@ web_include_css = "/assets/js/web_ecs.min.css"
 # ------------------------------
 #
 override_whitelisted_methods = {
-	"frappe.desk.doctype.notification_log.notification_log.get_notification_logs": "ibc.overrides.notification_log.get_notification_logs"
+	"frappe.desk.doctype.notification_log.notification_log.get_notification_logs": "ibc.overrides.notification_log.get_notification_logs",
+	"erpnext.crm.doctype.lead.lead.get_lead_details": "ibc.overrides.lead.get_lead_details",
 }
 
 # override_whitelisted_methods = {

@@ -17,6 +17,9 @@ def before_validate(doc, method=None):
     pass
 
 def validate(doc, method=None):
+    if doc.quotation_to == "Customer" and not doc.custom_mobile_no and doc.party_name:
+        doc.custom_mobile_no = get_mobile_no_from_lead(doc.party_name)
+
     if doc.quotation_to == "Customer" and not doc.custom_mobile_no:
         frappe.throw(
             _('لا يمكنك الاستمرار في عرض السعر هذا حتى تقوم بتعيين رقم الموبايل للعميل "{0}"').format(
@@ -24,6 +27,12 @@ def validate(doc, method=None):
             ),
             title=_("رقم الموبايل مطلوب"),
         )
+
+
+def get_mobile_no_from_lead(customer):
+    """Fallback: if the Customer has no mobile no, try the Lead it was converted from."""
+    lead = frappe.db.get_value("Customer", customer, "lead_name")
+    return lead and frappe.db.get_value("Lead", lead, "mobile_no")
 
 def on_submit(doc, method=None):
     pass
