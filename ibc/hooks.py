@@ -823,7 +823,7 @@ web_include_css = "/assets/js/web_ecs.min.css"
 # }
 
 # Testing
-# -------
+# ---------
 
 # before_tests = "ibc.install.before_tests"
 
