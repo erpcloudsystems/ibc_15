@@ -38,13 +38,14 @@ async function fill_mobile_no_from_lead(frm) {
 		return;
 	}
 
-	let r = await frappe.db.get_value("Customer", frm.doc.party_name, "lead_name");
-	let lead = r.message && r.message.lead_name;
-	if (!lead) return;
-
-	let r2 = await frappe.db.get_value("Lead", lead, "mobile_no");
-	let mobile_no = r2.message && r2.message.mobile_no;
-	if (mobile_no) {
-		frm.set_value("custom_mobile_no", mobile_no);
+	// Calls a whitelisted method (gated on Customer read access) instead of
+	// reading the Lead directly - some Sales Users can see the Customer but
+	// are restricted from the Lead by a "Sales Person" user permission.
+	let r = await frappe.call({
+		method: "ibc.doctype_triggers.selling.quotation.quotation.get_customer_mobile_no",
+		args: { customer: frm.doc.party_name },
+	});
+	if (r.message) {
+		frm.set_value("custom_mobile_no", r.message);
 	}
 }

@@ -30,9 +30,23 @@ def validate(doc, method=None):
 
 
 def get_mobile_no_from_lead(customer):
-    """Fallback: if the Customer has no mobile no, try the Lead it was converted from."""
+    """Fallback: if the Customer has no mobile no, try the Lead it was converted from.
+
+    Uses frappe.db.get_value (no permission checks) so a Sales User who can see
+    the Customer but not the linked Lead (e.g. restricted by a Sales Person user
+    permission on Lead) can still pull the number.
+    """
     lead = frappe.db.get_value("Customer", customer, "lead_name")
     return lead and frappe.db.get_value("Lead", lead, "mobile_no")
+
+
+@frappe.whitelist()
+def get_customer_mobile_no(customer):
+    """Whitelisted wrapper for the client script. Deliberately ignores Customer/Lead
+    read permissions (e.g. a Sales Person user permission) - any logged in user
+    filling a Quotation can pull the mobile no regardless of what else they can see.
+    """
+    return get_mobile_no_from_lead(customer)
 
 def on_submit(doc, method=None):
     pass
