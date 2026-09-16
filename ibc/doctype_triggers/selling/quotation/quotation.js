@@ -15,13 +15,18 @@ frappe.ui.form.on("Quotation", {
 	},
 
 	party_name(frm) {
-		fill_mobile_no_from_lead(frm);
+		// Always overwrite on customer change - Frappe's own "fetch from" can leave
+		// the previous customer's number in place when the field is permission
+		// filtered out of its response (e.g. Customer.mobile_no is permlevel 1).
+		set_mobile_no_for_customer(frm);
 	},
 
 	async validate(frm) {
 		if (frm.doc.quotation_to !== "Customer") return;
 
-		await fill_mobile_no_from_lead(frm);
+		if (!frm.doc.custom_mobile_no) {
+			await set_mobile_no_for_customer(frm);
+		}
 
 		if (!frm.doc.custom_mobile_no) {
 			frappe.throw(
@@ -33,19 +38,16 @@ frappe.ui.form.on("Quotation", {
 	},
 });
 
-async function fill_mobile_no_from_lead(frm) {
-	if (frm.doc.quotation_to !== "Customer" || frm.doc.custom_mobile_no || !frm.doc.party_name) {
-		return;
-	}
+async function set_mobile_no_for_customer(frm) {
+	if (frm.doc.quotation_to !== "Customer" || !frm.doc.party_name) return;
 
-	// Calls a whitelisted method (gated on Customer read access) instead of
-	// reading the Lead directly - some Sales Users can see the Customer but
-	// are restricted from the Lead by a "Sales Person" user permission.
+	// Calls a whitelisted method that ignores permissions/permlevel entirely,
+	// instead of relying on the core "fetch from" (which silently drops
+	// Customer.mobile_no for plain Sales Users) or reading the Lead directly
+	// (which some Sales Users are restricted from by a "Sales Person" user permission).
 	let r = await frappe.call({
 		method: "ibc.doctype_triggers.selling.quotation.quotation.get_customer_mobile_no",
 		args: { customer: frm.doc.party_name },
 	});
-	if (r.message) {
-		frm.set_value("custom_mobile_no", r.message);
-	}
+	frm.set_value("custom_mobile_no", r.message || "");
 }
