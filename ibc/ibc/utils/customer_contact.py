@@ -3,6 +3,23 @@ import frappe
 from frappe.contacts.doctype.contact.contact import get_default_contact
 
 
+@frappe.whitelist()
+def get_customer_mobile_no(customer):
+    """Look up a Customer's mobile no, falling back to the Lead it was converted from.
+
+    Deliberately ignores permissions - Customer.mobile_no is permlevel 1 (unreadable
+    by plain Sales Users) and Lead may be restricted by a "Sales Person" user
+    permission. Any logged in user filling a Quotation/Sales Order can pull the
+    number regardless of what else they can see.
+    """
+    mobile_no = frappe.db.get_value("Customer", customer, "mobile_no")
+    if mobile_no:
+        return mobile_no
+
+    lead = frappe.db.get_value("Customer", customer, "lead_name")
+    return lead and frappe.db.get_value("Lead", lead, "mobile_no")
+
+
 def sync_customer_mobile_no(customer, mobile_no):
     """Push a mobile number to a Customer's primary Contact, and to Customer.mobile_no.
 

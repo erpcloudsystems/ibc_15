@@ -655,7 +655,7 @@ doctype_js = {
 	"Project" : "ibc/doctype_triggers/projects/project/project.js",
 	"Task" : "ibc/doctype_triggers/projects/task/task.js",
 	"Timesheet" : "ibc/doctype_triggers/projects/timesheet/timesheet.js",
-	"Customer" : "ibc/doctype_triggers/selling/customer/customer.js",
+	"Customer" : "doctype_triggers/selling/customer/customer.js",
 	"Customer Group" : "ibc/doctype_triggers/selling/customer_group/customer_group.js",
 	"Pricing Rule" : "ibc/doctype_triggers/selling/pricing_rule/pricing_rule.js",
 	"Sales Partner" : "ibc/doctype_triggers/selling/sales_partner/sales_partner.js",

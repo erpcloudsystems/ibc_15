@@ -1,6 +1,20 @@
+const QUOTATION_MOBILE_NO_PARTY_TYPES = ["Customer", "Lead"];
+
 frappe.ui.form.on("Quotation", {
 	refresh(frm) {
-		if (frm.is_new()) return;
+		if (frm.is_new()) {
+			// Whatever put a party on this new doc - manual pick, "Create Quotation"
+			// from a Lead, duplicating an old quotation, an import, ... - fill the
+			// mobile no if it came through empty.
+			if (
+				QUOTATION_MOBILE_NO_PARTY_TYPES.includes(frm.doc.quotation_to) &&
+				frm.doc.party_name &&
+				!frm.doc.custom_mobile_no
+			) {
+				set_mobile_no_for_party(frm);
+			}
+			return;
+		}
 
 		let roles = frappe.user_roles;
 		let is_sales_user = roles.includes("Sales User");
@@ -15,17 +29,17 @@ frappe.ui.form.on("Quotation", {
 	},
 
 	party_name(frm) {
-		// Always overwrite on customer change - Frappe's own "fetch from" can leave
-		// the previous customer's number in place when the field is permission
+		// Always overwrite on party change - Frappe's own "fetch from" can leave
+		// the previous party's number in place when the field is permission
 		// filtered out of its response (e.g. Customer.mobile_no is permlevel 1).
-		set_mobile_no_for_customer(frm);
+		set_mobile_no_for_party(frm);
 	},
 
 	async validate(frm) {
-		if (frm.doc.quotation_to !== "Customer") return;
+		if (!QUOTATION_MOBILE_NO_PARTY_TYPES.includes(frm.doc.quotation_to)) return;
 
 		if (!frm.doc.custom_mobile_no) {
-			await set_mobile_no_for_customer(frm);
+			await set_mobile_no_for_party(frm);
 		}
 
 		if (!frm.doc.custom_mobile_no) {
@@ -38,16 +52,19 @@ frappe.ui.form.on("Quotation", {
 	},
 });
 
-async function set_mobile_no_for_customer(frm) {
-	if (frm.doc.quotation_to !== "Customer" || !frm.doc.party_name) return;
+async function set_mobile_no_for_party(frm) {
+	if (!QUOTATION_MOBILE_NO_PARTY_TYPES.includes(frm.doc.quotation_to) || !frm.doc.party_name) {
+		return;
+	}
 
 	// Calls a whitelisted method that ignores permissions/permlevel entirely,
 	// instead of relying on the core "fetch from" (which silently drops
-	// Customer.mobile_no for plain Sales Users) or reading the Lead directly
-	// (which some Sales Users are restricted from by a "Sales Person" user permission).
+	// Customer.mobile_no for plain Sales Users) or reading the Lead/Customer
+	// directly (some Sales Users are restricted from a Lead by a "Sales Person"
+	// user permission).
 	let r = await frappe.call({
-		method: "ibc.doctype_triggers.selling.quotation.quotation.get_customer_mobile_no",
-		args: { customer: frm.doc.party_name },
+		method: "ibc.doctype_triggers.selling.quotation.quotation.get_party_mobile_no",
+		args: { quotation_to: frm.doc.quotation_to, party_name: frm.doc.party_name },
 	});
 	frm.set_value("custom_mobile_no", r.message || "");
 }

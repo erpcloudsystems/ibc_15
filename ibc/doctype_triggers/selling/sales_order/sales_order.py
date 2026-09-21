@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from ibc.ibc.utils.customer_contact import sync_customer_mobile_no
+from ibc.ibc.utils.customer_contact import sync_customer_mobile_no, get_customer_mobile_no
 
 
 def before_insert(doc, method=None):
@@ -32,6 +32,9 @@ def before_validate(doc, method=None):
     pass
 
 def validate(doc, method=None):
+    if not doc.custom_mobile_no and doc.customer:
+        doc.custom_mobile_no = get_customer_mobile_no(doc.customer)
+
     if not doc.custom_mobile_no:
         frappe.throw(
             _('لا يمكنك الاستمرار في أمر البيع هذا حتى تقوم بتعيين رقم الموبايل للعميل "{0}"').format(
