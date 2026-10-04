@@ -46,7 +46,6 @@ def validate(doc, method=None):
     )
     headers = {
         "content-type": "application/json;charset=utf-8",
-        "Content-Length": "376",
         "Connection": "keep-alive",
         "Accept-Encoding":"gzip, deflate, br",
         "Accept":"*/*",
@@ -103,7 +102,6 @@ def validate(doc, method=None):
 
                     headers = {
                         "content-type": "application/json;charset=utf-8",
-                        "Content-Length": "376",
                         "Connection": "keep-alive",
                         "Accept-Encoding":"gzip, deflate, br",
                         "Accept":"*/*",
@@ -212,7 +210,6 @@ def after_rename(first, name, before_rename, after_rename, bool_arg):
             )
             headers = {
                 "content-type": "application/json;charset=utf-8",
-                "Content-Length": "376",
                 "Connection": "keep-alive",
                 "Accept-Encoding":"gzip, deflate, br",
                 "Accept":"*/*",
