@@ -9,9 +9,10 @@ MAX_DUPLICATES_SHOWN = 5
 def find_duplicate_mobile_no_documents(doc):
     """Find every other Lead/Customer already using doc.mobile_no.
 
-    Excludes the document being saved, and - for a Customer that was
-    converted from a Lead - excludes that same originating Lead, since it
-    legitimately shares the mobile number.
+    Excludes the document being saved, and excludes the Lead<->Customer pair
+    formed by a Customer converted from a Lead in either direction - that
+    pair legitimately shares the mobile number, whichever side is being
+    validated.
 
     Returns a list of (found_doctype, found_name) tuples, with matches in
     doc's own doctype listed first (the more direct conflict).
@@ -21,23 +22,23 @@ def find_duplicate_mobile_no_documents(doc):
         return []
 
     lead_filters = {"mobile_no": mobile_no}
-    customer_filters = {"mobile_no": mobile_no}
+    if doc.doctype == "Lead" and not doc.is_new():
+        lead_filters["name"] = ["!=", doc.name]
+    elif doc.doctype == "Customer" and doc.lead_name:
+        lead_filters["name"] = ["!=", doc.lead_name]
 
+    customer_matches = frappe.get_all(
+        "Customer", filters={"mobile_no": mobile_no}, fields=["name", "lead_name"]
+    )
     if doc.doctype == "Lead":
-        if not doc.is_new():
-            lead_filters["name"] = ["!=", doc.name]
-    elif doc.doctype == "Customer":
-        if not doc.is_new():
-            customer_filters["name"] = ["!=", doc.name]
-        if doc.lead_name:
-            lead_filters["name"] = ["!=", doc.lead_name]
+        customer_matches = [c for c in customer_matches if c.lead_name != doc.name]
+    elif doc.doctype == "Customer" and not doc.is_new():
+        customer_matches = [c for c in customer_matches if c.name != doc.name]
 
     duplicate_leads = [
         ("Lead", name) for name in frappe.get_all("Lead", filters=lead_filters, pluck="name")
     ]
-    duplicate_customers = [
-        ("Customer", name) for name in frappe.get_all("Customer", filters=customer_filters, pluck="name")
-    ]
+    duplicate_customers = [("Customer", c.name) for c in customer_matches]
 
     # List duplicates within the same doctype first - that is the more direct conflict.
     if doc.doctype == "Customer":
@@ -47,7 +48,15 @@ def find_duplicate_mobile_no_documents(doc):
 
 def validate_unique_mobile_no(doc):
     """Throw, linking to every existing document, if doc.mobile_no is
-    already used by another Lead or Customer."""
+    already used by another Lead or Customer.
+
+    Only runs when Mobile No is new or was just changed on this save - a
+    document that already had a duplicate number saved before this check
+    existed can still be edited normally without touching Mobile No.
+    """
+    if not doc.is_new() and not doc.has_value_changed("mobile_no"):
+        return
+
     duplicates = find_duplicate_mobile_no_documents(doc)
     if not duplicates:
         return
