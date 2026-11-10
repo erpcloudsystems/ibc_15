@@ -124,6 +124,8 @@ def after_insert(doc, method=None):
             "desc": doc.discription_ar or "",
         }
 
+        
+
         try:
             headers={
                     "Content-Type": "application/json",
